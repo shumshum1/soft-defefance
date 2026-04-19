@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Smart Atmospheric Shield</title>
+  <style>
+    :root {
+      --bg-1: #07111f;
+      --bg-2: #0d1b2f;
+      --panel: rgba(10, 22, 38, 0.78);
+      --panel-border: rgba(120, 170, 220, 0.18);
+      --text: #eaf4ff;
+      --muted: #a9bfd7;
+      --accent: #7fd4ff;
+      --accent-2: #6df0c2;
+      --danger: #ffb46b;
+      --shadow: 0 20px 60px rgba(0,0,0,0.35);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Arial, sans-serif;
+      background:
+        radial-gradient(circle at 20% 20%, rgba(127, 212, 255, 0.12), transparent 28%),
+        radial-gradient(circle at 80% 10%, rgba(109, 240, 194, 0.10), transparent 26%),
+        radial-gradient(circle at 50% 70%, rgba(255, 180, 107, 0.08), transparent 30%),
+        linear-gradient(160deg, var(--bg-1), var(--bg-2));
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.7;
+    }
+
+    .grid-overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+      opacity: 0.5;
+    }
+
+    .container {
+      width: min(1180px, calc(100% - 32px));
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero {
+      padding: 72px 0 48px;
+    }
+
+    .hero-box {
+      background: linear-gradient(180deg, rgba(11, 25, 44, 0.86), rgba(7, 16, 30, 0.76));
+      border: 1px solid var(--panel-border);
+      border-radius: 32px;
+      padding: 36px;
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-box::before {
+      content: "";
+      position: absolute;
+      top: -80px;
+      left: -80px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(127, 212, 255, 0.18), transparent 65%);
+      filter: blur(8px);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border: 1px solid rgba(127, 212, 255, 0.22);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 0.92rem;
+      letter-spacing: 0.2px;
+      background: rgba(127, 212, 255, 0.06);
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 16px;
+      font-size: clamp(2.2rem, 5vw, 4.4rem);
+      line-height: 1.08;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      font-size: clamp(1.05rem, 2vw, 1.45rem);
+      color: #d4e8ff;
+      margin: 0 0 22px;
+      max-width: 900px;
+    }
+
+    .hook {
+      font-size: 1.06rem;
+      color: var(--muted);
+      max-width: 900px;
+      margin: 0;
+    }
+
+    .hook strong {
+      color: var(--text);
+    }
+
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 30px;
+    }
+
+    .stat {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 20px;
+      padding: 18px;
+    }
+
+    .stat b {
+      display: block;
+      font-size: 1.1rem;
+      color: var(--accent-2);
+      margin-bottom: 6px;
+    }
+
+    .section {
+      padding: 18px 0 70px;
+    }
+
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      gap: 18px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .section-head h2 {
+      margin: 0;
+      font-size: clamp(1.7rem, 3vw, 2.4rem);
+    }
+
+    .section-head p {
+      margin: 0;
+      color: var(--muted);
+      max-width: 760px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, rgba(13, 27, 47, 0.88), rgba(7, 16, 30, 0.82));
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      inset: auto -20% -35% auto;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(127, 212, 255, 0.10), transparent 70%);
+      pointer-events: none;
+    }
+
+    .card-tag {
+      display: inline-block;
+      align-self: flex-start;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(109, 240, 194, 0.08);
+      border: 1px solid rgba(109, 240, 194, 0.18);
+      color: var(--accent-2);
+      font-size: 0.85rem;
+      margin-bottom: 16px;
+    }
+
+    .card h3 {
+      margin: 0 0 12px;
+      font-size: 1.45rem;
+    }
+
+    .lead {
+      color: #dbeeff;
+      margin-bottom: 14px;
+    }
+
+    .label {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .card p {
+      margin: 0 0 12px;
+      color: var(--muted);
+    }
+
+    .params {
+      margin-top: 12px;
+      padding: 14px 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.07);
+      color: #dbe7f5;
+      font-size: 0.97rem;
+    }
+
+    .btn {
+      margin-top: auto;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: #04131d;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-weight: 700;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+      box-shadow: 0 10px 28px rgba(109, 240, 194, 0.18);
+      margin-top: 18px;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 34px rgba(127, 212, 255, 0.22);
+    }
+
+    .footer-note {
+      margin-top: 28px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255, 180, 107, 0.06);
+      border: 1px solid rgba(255, 180, 107, 0.16);
+      color: #ffe6c8;
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 980px) {
+      .cards,
+      .hero-stats {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-box {
+        padding: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="grid-overlay"></div>
+
+  <nav style="position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(7,17,31,0.96);border-bottom:1px solid rgba(120,170,220,0.18);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:52px;font-family:'Segoe UI',Arial,sans-serif;direction:rtl;">
+    <a href="mainPage.html" style="color:#7fd4ff;text-decoration:none;font-weight:700;font-size:0.9rem;display:flex;align-items:center;gap:8px;"><span style="color:#6df0c2;font-size:1.1rem;">◈</span> Smart Atmospheric Shield</a>
+    <div style="display:flex;gap:4px;">
+      <a href="כימיה.HTML" style="color:#a9bfd7;text-decoration:none;padding:6px 14px;border-radius:999px;font-size:0.82rem;border:1px solid transparent;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">כימיה והדבקה</a>
+      <a href="soft_kill_pro_presentation.HTML" style="color:#a9bfd7;text-decoration:none;padding:6px 14px;border-radius:999px;font-size:0.82rem;border:1px solid transparent;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">אווירונאוטיקה</a>
+      <a href="מבצעי.HTML" style="color:#a9bfd7;text-decoration:none;padding:6px 14px;border-radius:999px;font-size:0.82rem;border:1px solid transparent;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">מבצעי</a>
+      <a href="about.html" style="color:#a9bfd7;text-decoration:none;padding:6px 14px;border-radius:999px;font-size:0.82rem;border:1px solid transparent;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">About</a>
+    </div>
+  </nav>
+
+  <header class="hero" style="padding-top:124px;">
+    <div class="container">
+      <div class="hero-box">
+        <div class="eyebrow">Strategic Defense Concept • Atmospheric Interception Layer</div>
+        <h1>Smart Atmospheric Shield</h1>
+        <p class="subtitle">הצעה לגישה חדשה להגנה מפני טילים היפרסוניים ובליסטיים</p>
+        <p class="hook">
+          <strong>יצירת "שדה מוקשים" אטמוספרי</strong> הממיר את האנרגיה הקינטית של האיום למנגנון השמדה עצמית.<br>
+          הגישה מאפשרת הגנה גבוהה לפרק זמן ממושך לשטחים גדולים מפני טילים ארוכי טווח בעלות נמוכה משמעותית מהשיטות הקיימות (ברזל בברזל).<br>
+          השיטה אקולוגית ואינה מסכנת כלי תעופה אחרים במרחב.
+        </p>
+
+        <div class="hero-stats">
+          <div class="stat">
+            <b>Area Defense</b>
+            פריסה אטמוספרית רחבה ליצירת מעטפת הגנה מעל שטחים נרחבים.
+          </div>
+          <div class="stat">
+            <b>Persistent Protection</b>
+            שמירה על אפקט הגנתי לאורך זמן ללא צורך ביירוט נקודתי לכל איום.
+          </div>
+          <div class="stat">
+            <b>Low-Cost Logic</b>
+            מעבר ממודל יקר של מיירט מול מיירט לפתרון בעל עלות שולית נמוכה.
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="section">
+    <div class="container">
+      <div class="section-head">
+        <h2>שלושת עמודי התווך של הקונספט</h2>
+        <p>
+          מבנה העמוד תוכנן להדגיש חדשנות מדעית, היגיון הנדסי ויתרון מערכתי. כל כרטיס מציג שכבה אחרת של הרעיון: חומר, מנגנון, ויכולת מבצעית.
+        </p>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <span class="card-tag">כימיה והחומרים</span>
+          <h3>ענן אבק דביק</h3>
+          <p class="lead"><span class="label">עקרון הליבה:</span> שימוש בחלקיקים הבנויים ממטריצת PVA מצולבת תרמו-סטבלית עם מיקרו-בלונים המגיבים לחום.</p>
+          <p><span class="label">הבשורה:</span> טכנולוגיית יצור נפוצה, חומרי מדף קיימים והשמדה עצמית אקולוגית.</p>
+          <div class="params">
+            <strong>פרמטרים שנבדקו:</strong><br>
+            טמפרטורות הדבקה, גמישות ומשיכה אלקטרוסטטית.
+          </div>
+          <a href="כימיה.HTML" class="btn">לנתונים טכניים ומחשבון כימי ←</a>
+        </article>
+
+        <article class="card">
+          <span class="card-tag">אווירונאוטיקה</span>
+          <h3>יצירת מצבי כשל אוירודינמיים</h3>
+          <p class="lead"><span class="label">עקרון הליבה:</span> יצירת זרימה טורבולנטית על פני מעטפת הטיל באמצעות מעבר מזרימה למינרית לזרימה טורבולנטית (Laminar-to-Turbulent Transition) כתוצאה מחספוס פני השטח.</p>
+          <p><span class="label">המנגנון:</span> הידבקות חלקיקים מתנפחים למעטפת הטיל המייצרים "יתדות טורבולנטיות" (Turbulent Wedges).</p>
+          <p><span class="label">הבשורה:</span> הגדלת שטף החום ויצירת כשל מבני והתפרקות תוך שניות בודדות.</p>
+          <div class="params">
+            <strong>פרמטרים שנבדקו:</strong><br>
+            גל הלם, מהירות, פריצת שכבת הגנה.
+          </div>
+          <a href="soft_kill_pro_presentation.HTML" class="btn">לניתוח זרימה וסימולטור פריצה ←</a>
+        </article>
+
+        <article class="card">
+          <span class="card-tag">יכולות ההגנה</span>
+          <h3>הגנת שטח רחבה בעלות שולית</h3>
+          <p class="lead"><span class="label">עקרון הליבה:</span> הגנת שטח (Area Defense) מבוססת שטיח אטמוספרי.</p>
+          <p><span class="label">המנגנון:</span> יצירת עננה על פני שטח רחב (עשרות קמ&quot;ר) המבטיחה פירוק הטיל ללא צורך בדיוק הנחיה גבוה.</p>
+          <p><span class="label">הבשורה:</span> עלות נמוכה פי 1,000 ממיירט קינטי, הגנה למשך זמן, התמודדות עם מטחים ושיבוש יכולת התמרון (MaRV).</p>
+          <div class="params">
+            <strong>פרמטרים שנבדקו:</strong><br>
+            יכולות פיזור קיימות, עלויות ביצוע, אקולוגיה ונזקים אגביים.
+          </div>
+          <a href="מבצעי.HTML" class="btn">למחשבון פריסה ומדדי הגנה ←</a>
+        </article>
+      </div>
+
+     
+    </div>
+  </main>
+</body>
+</html>

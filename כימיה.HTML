@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חזון טכנולוגי - שריון ריאקטיבי לסטרטוספרה</title>
+    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;500;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #080c16;
+            --card-bg: #121826;
+            --accent-blue: #00e5ff;
+            --accent-orange: #ff9100;
+            --accent-red: #ff1744;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Heebo', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 1000px;
+            padding: 50px 20px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            padding-bottom: 30px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            background: linear-gradient(90deg, var(--accent-blue), #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            font-size: 1.4rem;
+            color: var(--text-muted);
+            margin: 0;
+            font-weight: 300;
+            letter-spacing: 0.5px;
+        }
+
+        .pitch-box {
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.05), transparent);
+            border-right: 4px solid var(--accent-blue);
+            padding: 25px;
+            margin-bottom: 50px;
+            border-radius: 8px;
+            font-size: 1.15rem;
+            line-height: 1.7;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+        }
+
+        .pitch-box strong {
+            color: var(--accent-blue);
+            font-weight: 800;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+            position: relative;
+        }
+
+        /* The central vertical line */
+        .timeline::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            bottom: 20px;
+            right: 50px;
+            width: 2px;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.1), var(--accent-orange), var(--accent-red));
+            z-index: 0;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.02);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+        }
+
+        .step:hover {
+            transform: translateX(-5px);
+            border-color: rgba(255,255,255,0.1);
+        }
+
+        .temp-badge {
+            min-width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: var(--bg-color);
+            border: 2px solid var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-left: 30px;
+            font-weight: 800;
+            font-size: 1.6rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .step:nth-child(1) .temp-badge { border-color: var(--text-muted); color: var(--text-muted); }
+        .step:nth-child(2) .temp-badge { border-color: var(--accent-blue); color: var(--accent-blue); box-shadow: 0 0 20px rgba(0, 229, 255, 0.15); }
+        .step:nth-child(3) .temp-badge { border-color: var(--accent-orange); color: var(--accent-orange); box-shadow: 0 0 20px rgba(255, 145, 0, 0.15); }
+        .step:nth-child(4) .temp-badge { border-color: var(--accent-red); color: var(--accent-red); box-shadow: 0 0 20px rgba(255, 23, 68, 0.2); }
+
+        .temp-badge span {
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 2px;
+        }
+
+        .content h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.4rem;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .content p {
+            margin: 0 0 15px 0;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .tags {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .tag {
+            background: rgba(255,255,255,0.03);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: var(--accent-blue);
+            font-family: monospace;
+            border: 1px solid rgba(0, 229, 255, 0.1);
+        }
+
+        .board-invite {
+            text-align: center;
+            margin-top: 70px;
+            padding: 45px;
+            background: radial-gradient(circle at center, rgba(0, 229, 255, 0.08) 0%, transparent 70%);
+            border-top: 1px solid rgba(255,255,255,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .board-invite h2 {
+            margin-top: 0;
+            color: #fff;
+            font-size: 2rem;
+            font-weight: 300;
+        }
+
+        .board-invite p {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 25px auto;
+            line-height: 1.6;
+        }
+
+        .contact-action {
+            display: inline-block;
+            padding: 12px 30px;
+            background: transparent;
+            color: var(--accent-blue);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1.1rem;
+            border: 2px solid var(--accent-blue);
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .contact-action:hover {
+            background: var(--accent-blue);
+            color: var(--bg-color);
+            box-shadow: 0 0 20px rgba(0, 229, 255, 0.3);
+        }
+
+        @keyframes subtlePulse {
+            0% { box-shadow: 0 0 15px rgba(255, 145, 0, 0.1); }
+            50% { box-shadow: 0 0 25px rgba(255, 145, 0, 0.3); }
+            100% { box-shadow: 0 0 15px rgba(255, 145, 0, 0.1); }
+        }
+        .step:nth-child(3) .temp-badge { animation: subtlePulse 3s infinite; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+        <h1>השמדת איומים באמצעות כשל אווירודינמי</h1>
+        <p class="subtitle">יצירת קריסה מבנית מבוססת שינויי פאזה תרמו-דינמיים בחלל קרוב</p>
+    </header>
+
+    <div class="pitch-box">
+        <strong>במקום להשמיד את האיום, אנו גורמים לכשל של השמדה עצמית. אנו מפתחים מטריצה חכמה של חלקיקי Core-Shell זעירים המופעלים קינטית. בגובה 50 ק"מ (תנאי ואקום כמעט מוחלט), המערכת מנצלת את גל החום של האיום כדי להפעיל סדרת תגובות Solid-State כרונולוגיות. בתוך שבריר שנייה, החומר עובר התנפחות וצילוב פולימרי אקסותרמי, ויוצר "קוץ" (Spoiler) קומפוזיטי קשיח על גוף הטיל התוקף.
+התוצאה, שיבוש אלים של הזרימה ההיפר-סונית: יצירת גל הלם אסימטרי והפרדת שכבת הגבול, המובילים למומנט פיתול קיצוני, רוויית מערכות הניהוג, ולבסוף – השמדה עצמית כתוצאה מכשל מבני.</strong>
+    </div>
+
+  
+    <div class="timeline">
+        
+        <div class="step">
+            <div class="temp-badge">&lt;140&deg;<span>מצב בסיס</span></div>
+            <div class="content">
+                <h3>ארכיטקטורת ליבה-מעטפת</h3>
+                <p>החלקיק (כ-75μm) שומר על יציבות מבנית. הוא מורכב מליבת גז לכודה, העטופה במטריצת שריון פולימרית בעלת מקשה סמוי (Latent Hardener), ומצופה במעטפת תרמופלסטית דקה. המערכת נטולת לחות לחלוטין כדי למנוע רתיחה בוואקום.</p>
+                <div class="tags">
+                    <span class="tag">Solid-State</span>
+                    <span class="tag">Zero-Moisture</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="temp-badge">140&deg;C<span>היתוך</span></div>
+            <div class="content">
+                <h3>שלב 1: הדבקה רשתית</h3>
+                <p>עם החשיפה לחום, המעטפת החיצונית (Thermoplastic PVA) חוצה את נקודת ההיתוך שלה. ירידת הצמיגות יוצרת משטח דביק ואגרסיבי המלכד את רשת החלקיקים למטריצה רציפה המקובעת לדופן.</p>
+                <div class="tags">
+                    <span class="tag">Thermoplastic Transition</span>
+                    <span class="tag">Adhesion</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="temp-badge">160&deg;C<span>התנפחות</span></div>
+            <div class="content">
+                <h3>שלב 2: התרחבות נפחית בוואקום</h3>
+                <p>שכבת הביניים (האפוקסי/CNTs) הופכת לפלסטית וגמישה. במקביל, ליבת המיקרו-בלונים מגיבה לחום. הפרש הלחצים הקיצוני מול הוואקום הסטרטוספרי מביא להתנפחות מהירה ואלימה המותחת את המטריצה החוצה.</p>
+                <div class="tags">
+                    <span class="tag">Volumetric Expansion</span>
+                    <span class="tag">Vacuum Dynamics</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="step">
+            <div class="temp-badge">180&deg;C<span>נעילה</span></div>
+            <div class="content">
+                <h3>שלב 3: צילוב קטליטי (Cross-Linking)</h3>
+                <p>בדיוק בשיא ההתנפחות, המקשה הסמוי מופעל. תגובת שרשרת אקסותרמית צולבת את מטריצת האפוקסי, ננו-סיליקה וה-CNTs למבנה קומפוזיט צפוף. נוצר שריון קשיח ובלתי לחיץ שמבודד ובולם את האיום.</p>
+                <div class="tags">
+                    <span class="tag">Exothermic Cure</span>
+                    <span class="tag">Composite Lock</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- PARTNERSHIP SECTION -->
+<div style="max-width:1400px;margin:60px auto 0;padding:0 20px 60px;direction:rtl;">
+  <div style="background:linear-gradient(135deg,rgba(10,18,32,0.92),rgba(7,14,26,0.88));border:1px solid rgba(127,212,255,0.2);border-radius:24px;padding:40px 44px;box-shadow:0 20px 60px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:28px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(109,240,194,0.12),transparent 65%);pointer-events:none;"></div>
+    <div style="flex:1;min-width:260px;">
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(109,240,194,0.3);border-radius:999px;color:#6df0c2;font-size:0.82rem;background:rgba(109,240,194,0.06);margin-bottom:16px;letter-spacing:0.03em;">✦ הזדמנות לשותפות מדעית</div>
+      <div style="font-size:1.35rem;font-weight:700;color:#eaf4ff;margin-bottom:10px;line-height:1.3;">מחפש שותפים לדרך</div>
+      <div style="font-size:0.97rem;color:#a9bfd7;line-height:1.75;max-width:560px;">אני בשלב גיבוש הבורד ומחפש שותפים לדרך, שמאמינים בקידום ההגנה על המולדת — אנשי מדע, הנדסה ואסטרטגיה שרוצים להיות חלק ממשהו משמעותי.</div>
+    </div>
+    <a href="about.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:#04131d;background:linear-gradient(135deg,#7fd4ff,#6df0c2);padding:14px 24px;border-radius:16px;font-weight:700;font-size:0.95rem;box-shadow:0 10px 28px rgba(109,240,194,0.2);white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">היכרות עם היזם ←</a>
+  </div>
+</div>
+
+</body>
+</html>
