@@ -307,5 +307,292 @@
   </div>
 </div>
 
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;600;700&display=swap');
+.eng-dashboard {
+    font-family: 'IBM Plex Sans Hebrew', 'Heebo', sans-serif;
+    background: #0f1117;
+    border: 1px solid rgba(58,143,221,0.35);
+    border-radius: 18px;
+    max-width: 1400px;
+    margin: 0 auto 70px;
+    padding: 26px;
+    box-shadow: 0 16px 50px rgba(0,0,0,0.35);
+}
+.eng-title {margin:0 0 8px;color:#d9edff;font-size:1.5rem;}
+.eng-sub {margin:0 0 22px;color:#9bb5d1;font-size:0.95rem;line-height:1.7;}
+.eng-grid {display:grid;grid-template-columns:1fr;gap:18px;}
+.canvas-wrap{background:#0b0e14;border:1px solid rgba(148,179,208,0.2);border-radius:14px;padding:14px;overflow-x:auto;}
+#particleCanvas{width:900px;height:360px;min-width:900px;display:block;background:linear-gradient(90deg,#111826 0%,#121a2a 70%,#141f2f 100%);border-radius:10px;}
+.panel{background:#121826;border:1px solid rgba(148,163,184,0.2);border-radius:14px;padding:14px 14px 10px;}
+.controls{display:grid;gap:12px;}
+.sim-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.sim-btn{background:#1b3048;color:#dff0ff;border:1px solid rgba(58,143,221,0.6);border-radius:10px;padding:8px 12px;font-family:'IBM Plex Sans Hebrew','Heebo',sans-serif;font-size:0.9rem;cursor:pointer;transition:.2s;}
+.sim-btn:hover{background:#25466a;}
+.control-row label{display:flex;justify-content:space-between;gap:10px;color:#d7e7fa;font-size:0.92rem;margin-bottom:6px;}
+.control-row input[type="range"]{width:100%;accent-color:#3a8fdd;}
+.readouts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px;}
+.metric{background:#0d131f;border:1px solid rgba(58,143,221,0.18);border-radius:10px;padding:9px;}
+.metric .k{color:#88a2bf;font-size:0.78rem;display:block;margin-bottom:4px;}
+.metric .v{color:#f2f8ff;font-weight:600;font-size:0.96rem;}
+.formulas{margin-top:14px;display:grid;gap:7px;}
+.formula{padding:8px 10px;border-radius:10px;background:#0d131f;border:1px solid rgba(255,255,255,0.06);color:#a9c1da;font-size:0.84rem;transition:.2s;}
+.formula.active{border-color:#3a8fdd;background:rgba(58,143,221,0.15);color:#eef6ff;box-shadow:0 0 0 1px rgba(58,143,221,0.25) inset;}
+.legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;color:#9ab2ce;font-size:0.8rem;}
+.dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-left:5px;}
+@media (max-width: 980px){.readouts{grid-template-columns:1fr;}}
+</style>
+
+<section class="eng-dashboard" dir="rtl" aria-label="לוח סימולציה הנדסי">
+  <h2 class="eng-title">לוח סימולציה אינטראקטיבי: מסע חלקיק מרובד עד דופן הטיל</h2>
+  <p class="eng-sub">הדמיה בזמן אמת של חלקיק ליבה-שריון-PVA בסביבה היפרסונית. ניתן לשנות פרמטרים ולראות טרנספורמציה תרמית-מכנית מהלם ועד פגיעה.</p>
+  <div class="eng-grid">
+    <div class="canvas-wrap">
+      <canvas id="particleCanvas" width="900" height="360"></canvas>
+      <div class="legend">
+        <span><i class="dot" style="background:#71d2ff"></i>ליבה (בלון)</span>
+        <span><i class="dot" style="background:#c0ced9"></i>שריון (אפוקסי)</span>
+        <span><i class="dot" style="background:#72ffcf"></i>מעטפת PVA</span>
+      </div>
+    </div>
+    <aside class="panel">
+      <div class="controls">
+        <div class="sim-actions">
+          <button id="startSimBtn" class="sim-btn" type="button">הפעל סימולציה</button>
+          <button id="restartSimBtn" class="sim-btn" type="button">אתחל סימולציה</button>
+        </div>
+        <div class="control-row">
+          <label for="machRange"><span>מהירות הטיל (מאך)</span><strong id="machVal">6</strong></label>
+          <input id="machRange" type="range" min="3" max="15" step="0.1" value="6">
+        </div>
+        <div class="control-row">
+          <label for="shockRange"><span>מרחק גל ההלם (ס״מ)</span><strong id="shockVal">5</strong></label>
+          <input id="shockRange" type="range" min="1" max="20" step="0.1" value="5">
+        </div>
+        <div class="control-row">
+          <label for="pvaRange"><span>עובי מעטפת PVA (מיקרון)</span><strong id="pvaVal">5</strong></label>
+          <input id="pvaRange" type="range" min="1" max="10" step="0.1" value="5">
+        </div>
+      </div>
+      <div class="readouts" id="readouts"></div>
+      <div class="formulas">
+        <div class="formula" data-formula="ablation">מודל אבלציה: ṁ = k·q^n</div>
+        <div class="formula" data-formula="gas">חוק הגזים: PV = nRT</div>
+        <div class="formula" data-formula="arrhenius">ארניוס: k = A·e<sup>-Ea/RT</sup></div>
+      </div>
+    </aside>
+  </div>
+</section>
+
+<script>
+(() => {
+  const canvas = document.getElementById('particleCanvas');
+  const ctx = canvas.getContext('2d');
+  const machRange = document.getElementById('machRange');
+  const shockRange = document.getElementById('shockRange');
+  const pvaRange = document.getElementById('pvaRange');
+  const startSimBtn = document.getElementById('startSimBtn');
+  const restartSimBtn = document.getElementById('restartSimBtn');
+  const readouts = document.getElementById('readouts');
+  const labels = {
+    mach: document.getElementById('machVal'),
+    shock: document.getElementById('shockVal'),
+    pva: document.getElementById('pvaVal')
+  };
+
+  const particle = { x: 45, baseR: 16, vx: 2.2, phase: 'טרום הלם', smoke: [] };
+  let holdImpact = 0;
+  let simElapsedMs = 0;
+  let isRunning = false;
+
+
+  function armorThickness(pva) {
+    return Math.max(0, 20 - (pva - 5) * 2);
+  }
+
+  function currentZones() {
+    const w = canvas.width;
+    const wallX = w - 62;
+    const shockPx = 45 + (parseFloat(shockRange.value) - 1) / 19 * 230;
+    const boundaryW = 24;
+    return { wallX, shockStart: wallX - shockPx, boundaryStart: wallX - boundaryW, boundaryW };
+  }
+
+  function phaseByX(x, zones) {
+    if (x < zones.shockStart) return 'טרום הלם';
+    if (x < zones.boundaryStart) return 'בתוך גל הלם';
+    if (x < zones.wallX - 8) return 'שכבת גבול';
+    return 'פגיעה';
+  }
+
+  function transitTimeMs() {
+    const mach = parseFloat(machRange.value);
+    const distanceCm = parseFloat(shockRange.value);
+    const speedMs = mach * 343;
+    return (distanceCm / 100) / speedMs * 1000;
+  }
+
+  function updateLabels() {
+    labels.mach.textContent = parseFloat(machRange.value).toFixed(1);
+    labels.shock.textContent = parseFloat(shockRange.value).toFixed(1);
+    labels.pva.textContent = parseFloat(pvaRange.value).toFixed(1);
+  }
+
+  function drawBackground(zones) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = 'rgba(58,143,221,0.15)';
+    ctx.fillRect(zones.shockStart, 10, zones.wallX - zones.shockStart, canvas.height - 20);
+    ctx.fillStyle = 'rgba(255,193,7,0.18)';
+    ctx.fillRect(zones.boundaryStart, 10, zones.boundaryW, canvas.height - 20);
+    ctx.fillStyle = '#1f2736';
+    ctx.fillRect(zones.wallX, 0, 62, canvas.height);
+    ctx.fillStyle = '#7c8ea5';
+    ctx.font = '600 12px IBM Plex Sans Hebrew';
+    ctx.fillText('דופן הטיל', zones.wallX + 8, 24);
+  }
+
+  function drawSmoke() {
+    particle.smoke.forEach(s => {
+      s.x += s.vx; s.y += s.vy; s.life -= 0.02;
+      ctx.fillStyle = `rgba(210,220,230,${Math.max(0, s.life) * 0.45})`;
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2); ctx.fill();
+    });
+    particle.smoke = particle.smoke.filter(s => s.life > 0);
+  }
+
+  function drawParticle(zones, phase) {
+    const y = canvas.height / 2;
+    let coreR = particle.baseR;
+    let armorR = coreR + 8;
+    let shellR = armorR + 6;
+    let shellAlpha = 0.9;
+    let armorColor = '#c0ced9';
+
+    if (phase === 'בתוך גל הלם') {
+      shellAlpha = 0.35;
+      coreR *= 1.15;
+      if (Math.random() < 0.45) particle.smoke.push({x: particle.x - shellR, y: y + (Math.random() - .5) * 22, vx: -0.5 - Math.random()*0.9, vy:(Math.random()-.5)*0.45, r: 1 + Math.random()*3, life: .9});
+    }
+    if (phase === 'שכבת גבול') {
+      coreR *= 1.6;
+      armorR = coreR + 12;
+      shellR = armorR + 4;
+      shellAlpha = 0.2;
+      armorColor = '#6f7a88';
+    }
+    if (phase === 'פגיעה') {
+      armorColor = '#0a0b0d';
+      shellAlpha = 0.1;
+      ctx.save();
+      ctx.translate(particle.x + 8, y);
+      ctx.scale(0.78, 1.85);
+      ctx.fillStyle = '#71d2ff';
+      ctx.beginPath(); ctx.arc(0, 0, coreR, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = armorColor;
+      ctx.globalAlpha = 1;
+      ctx.beginPath(); ctx.arc(0, 0, armorR, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+      ctx.fillStyle = '#e8f4ff'; ctx.font = '700 18px IBM Plex Sans Hebrew';
+      ctx.fillText('שלד קשיח נוצר', zones.wallX - 170, y - 52);
+      return;
+    }
+
+    drawSmoke();
+    ctx.fillStyle = `rgba(114,255,207,${shellAlpha})`;
+    ctx.beginPath(); ctx.arc(particle.x, y, shellR, 0, Math.PI * 2); ctx.fill();
+
+    const grad = ctx.createRadialGradient(particle.x - 4, y - 4, 4, particle.x, y, armorR);
+    grad.addColorStop(0, '#f6fbff'); grad.addColorStop(1, armorColor);
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(particle.x, y, armorR, 0, Math.PI * 2); ctx.fill();
+
+    ctx.fillStyle = '#71d2ff';
+    ctx.beginPath(); ctx.arc(particle.x, y, coreR, 0, Math.PI * 2); ctx.fill();
+  }
+
+  function renderReadouts(phase) {
+    const mach = parseFloat(machRange.value);
+    const pva = parseFloat(pvaRange.value);
+    const armor = armorThickness(pva);
+    const totalTransitMs = transitTimeMs();
+    const timeStepMs = Math.min(0.0001, totalTransitMs / 1000);
+    const penetration = ((mach * 14 + armor * 0.8) * (phase === 'פגיעה' ? 1.18 : 0.72)).toFixed(1);
+
+    let pvaT = '0°C', armorT = '25°C', coreT = '0°C', flex = 'קשיח ויציב', adhesion='לא הופעל';
+    let active = 'ablation';
+    if (phase === 'בתוך גל הלם') {pvaT = `${Math.round(150 + mach * 18)}°C`; armorT='120°C'; coreT='60°C'; flex='מעטפת נמסה'; adhesion='הדבקה רשתית פעילה'; active='ablation';}
+    else if (phase === 'שכבת גבול') {pvaT='430°C'; armorT='340°C'; coreT='180°C'; flex='שריון נמתח ומתחשל'; adhesion='אחיזה יציבה'; active='gas';}
+    else if (phase === 'פגיעה') {pvaT='500°C'; armorT='500°C'; coreT='200°C'; flex='התמצקות מלאה / חריכה'; adhesion='נעילה מלאה'; active='arrhenius';}
+
+    const rows = [
+      ['סטטוס חלקיק', phase],
+      ['שלב פעיל', phase === 'טרום הלם' ? 'תנועה קרה (~0°C)' : phase],
+      ['טמפרטורת שכבות (PVA/אפוקסי/בלון)', `${pvaT} / ${armorT} / ${coreT}`],
+      ['סטטוס גמישות/התמצקות', flex],
+      ['עובי שכבת שריון מחושב (מיקרון)', armor.toFixed(1)],
+      ['זמן מעבר כולל (ms)', totalTransitMs.toFixed(6)],
+      ['זמן סימולציה נוכחי (ms)', simElapsedMs.toFixed(6)],
+      ['קצב דגימת זמן (ms)', timeStepMs.toFixed(6)],
+      ['עומק חדירה (מיקרון)', penetration],
+      ['סטטוס הדבקה', adhesion]
+    ];
+
+    readouts.innerHTML = rows.map(([k,v]) => `<div class="metric"><span class="k">${k}</span><span class="v">${v}</span></div>`).join('');
+    document.querySelectorAll('.formula').forEach(f => f.classList.toggle('active', f.dataset.formula === active));
+  }
+
+  function animate() {
+    if (!isRunning) return;
+    const zones = currentZones();
+    const distancePx = (zones.wallX - 2) - 46;
+    const totalTransitMs = transitTimeMs();
+    const progress = Math.min(1, Math.max(0, (particle.x - 46) / Math.max(1, distancePx)));
+    simElapsedMs = totalTransitMs * progress;
+    if (holdImpact > 0) {
+      holdImpact -= 1;
+    } else {
+      particle.vx = 1.4 + parseFloat(machRange.value) * 0.3;
+      particle.x += particle.vx;
+      if (particle.x > zones.wallX - 2) {
+        particle.x = zones.wallX - 2;
+        holdImpact = 36;
+      }
+      if (particle.x >= zones.wallX - 2 && holdImpact === 1) {
+        particle.x = 46;
+        simElapsedMs = 0;
+        particle.smoke.length = 0;
+      }
+    }
+    const phase = phaseByX(particle.x, zones);
+    drawBackground(zones);
+    drawParticle(zones, phase);
+    renderReadouts(phase);
+    requestAnimationFrame(animate);
+  }
+
+  [machRange, shockRange, pvaRange].forEach(el => el.addEventListener('input', updateLabels));
+  function startSimulation() {
+    if (isRunning) return;
+    isRunning = true;
+    startSimBtn.textContent = 'סימולציה פעילה';
+    animate();
+  }
+
+  function restartSimulation() {
+    particle.x = 46;
+    holdImpact = 0;
+    simElapsedMs = 0;
+    particle.smoke.length = 0;
+    if (!isRunning) startSimulation();
+  }
+
+  startSimBtn.addEventListener('click', startSimulation);
+  restartSimBtn.addEventListener('click', restartSimulation);
+  updateLabels();
+  startSimulation();
+})();
+</script>
+
 </body>
 </html>
