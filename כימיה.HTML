@@ -327,6 +327,9 @@
 #particleCanvas{width:900px;height:360px;min-width:900px;display:block;background:linear-gradient(90deg,#111826 0%,#121a2a 70%,#141f2f 100%);border-radius:10px;}
 .panel{background:#121826;border:1px solid rgba(148,163,184,0.2);border-radius:14px;padding:14px 14px 10px;}
 .controls{display:grid;gap:12px;}
+.sim-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.sim-btn{background:#1b3048;color:#dff0ff;border:1px solid rgba(58,143,221,0.6);border-radius:10px;padding:8px 12px;font-family:'IBM Plex Sans Hebrew','Heebo',sans-serif;font-size:0.9rem;cursor:pointer;transition:.2s;}
+.sim-btn:hover{background:#25466a;}
 .control-row label{display:flex;justify-content:space-between;gap:10px;color:#d7e7fa;font-size:0.92rem;margin-bottom:6px;}
 .control-row input[type="range"]{width:100%;accent-color:#3a8fdd;}
 .readouts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px;}
@@ -355,6 +358,10 @@
     </div>
     <aside class="panel">
       <div class="controls">
+        <div class="sim-actions">
+          <button id="startSimBtn" class="sim-btn" type="button">הפעל סימולציה</button>
+          <button id="restartSimBtn" class="sim-btn" type="button">אתחל סימולציה</button>
+        </div>
         <div class="control-row">
           <label for="machRange"><span>מהירות הטיל (מאך)</span><strong id="machVal">6</strong></label>
           <input id="machRange" type="range" min="3" max="15" step="0.1" value="6">
@@ -385,6 +392,8 @@
   const machRange = document.getElementById('machRange');
   const shockRange = document.getElementById('shockRange');
   const pvaRange = document.getElementById('pvaRange');
+  const startSimBtn = document.getElementById('startSimBtn');
+  const restartSimBtn = document.getElementById('restartSimBtn');
   const readouts = document.getElementById('readouts');
   const labels = {
     mach: document.getElementById('machVal'),
@@ -395,6 +404,7 @@
   const particle = { x: 45, baseR: 16, vx: 2.2, phase: 'טרום הלם', smoke: [] };
   let holdImpact = 0;
   let simElapsedMs = 0;
+  let isRunning = false;
 
 
   function armorThickness(pva) {
@@ -476,7 +486,7 @@
       shellAlpha = 0.1;
       ctx.save();
       ctx.translate(particle.x + 8, y);
-      ctx.scale(1.7, 0.56);
+      ctx.scale(0.78, 1.85);
       ctx.fillStyle = '#71d2ff';
       ctx.beginPath(); ctx.arc(0, 0, coreR, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = armorColor;
@@ -533,6 +543,7 @@
   }
 
   function animate() {
+    if (!isRunning) return;
     const zones = currentZones();
     const distancePx = (zones.wallX - 2) - 46;
     const totalTransitMs = transitTimeMs();
@@ -561,8 +572,25 @@
   }
 
   [machRange, shockRange, pvaRange].forEach(el => el.addEventListener('input', updateLabels));
+  function startSimulation() {
+    if (isRunning) return;
+    isRunning = true;
+    startSimBtn.textContent = 'סימולציה פעילה';
+    animate();
+  }
+
+  function restartSimulation() {
+    particle.x = 46;
+    holdImpact = 0;
+    simElapsedMs = 0;
+    particle.smoke.length = 0;
+    if (!isRunning) startSimulation();
+  }
+
+  startSimBtn.addEventListener('click', startSimulation);
+  restartSimBtn.addEventListener('click', restartSimulation);
   updateLabels();
-  animate();
+  startSimulation();
 })();
 </script>
 
