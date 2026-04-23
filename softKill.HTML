@@ -228,41 +228,44 @@
 <div class="container">
     <header>
         <h1>הגנה רכה</h1>
-        <p style="font-size: 1.2rem; color: var(--text-muted);">טכנולוגיית נטרול איומים באמצעות כשל אווירודינמי</p>
+        <p style="font-size: 1.2rem; color: var(--text-muted);">מסגרת פיתוח להפרעה אווירודינמית יזומה המבוססת על בחינה פיזיקלית־תיאורטית</p>
     </header>
 
     <section class="pitch-box">
         <div class="pitch-text">
-		במקום לנסות לפגוע באיום בצורה ישירה, אנו יוצרים עבורו סביבה הגוררת השמדה עצמית.
-		אנו מציעים קונספט שונה להתמודדות עם איומים בליסטיים והיפרסונים. 
-		אנו יוצרים ענן חלקיקים הנדבקים לגוף האיום ומשבשים את האווירודינמיקה עד לפירוק מבני.
+		זהו אינו רעיון תאורטי בלבד: הבסיס הפיזיקלי של המנגנון כבר נבחן, והצטברו נתוני יסוד יציבים התומכים בכיוון הפעולה.
+		המודל שפותח מתמקד ביצירת סביבת זרימה שמטרתה להוביל את האיום לרגישות תרמו־מבנית. 
+		בדף זה מוצגים יעדי הפיתוח והאימות של המנגנון, והשלב הבא הוא אימות הנדסי, ניסויי ויישומי.
         </div>
     </section>
 
     <div class="stages-grid">
         <div class="stage-card">
             <span class="stage-num">01</span>
-            <div class="stage-title">מגע והידבקות</div>
-            <p class="stage-desc">הטיל חולף דרך ענן חלקיקים. החלקיקים חוצים את גל ההלם ונדבקים למעטפת.</p>
+            <div class="stage-title">יעד פיתוח 01 — יצירת מגע והיצמדות אפקטיבית</div>
+            <p class="stage-desc">בחינת תנאי מעבר בענן חלקיקים, חציית גל ההלם והיצמדות מבוקרת למעטפת האיום בתנאי ייחוס שנגזרו מהמודל.</p>
         </div>
         <div class="stage-card">
             <span class="stage-num">02</span>
-            <div class="stage-title">היווצרות בליטה</div>
-            <p class="stage-desc">הצטברות חומר יוצרת "קוץ" של כ-400 מיקרון, החבוי בשלב זה בתוך שכבת הגבול העבה.</p>
+            <div class="stage-title">יעד פיתוח 02 — יצירת הפרעה גאומטרית מקומית</div>
+            <p class="stage-desc">אפיון הצטברות חומר היוצרת בליטה מקומית ("קוץ" מסדר גודל מאות מיקרונים) כטריגר להפרעת זרימה ממוקדת.</p>
         </div>
         <div class="stage-card">
             <span class="stage-num">03</span>
-            <div class="stage-title">דיקוק שכבת הגבול</div>
-            <p class="stage-desc">עם הכניסה לאטמוספירה הצפופה, הלחץ עולה ושכבת הגבול המגינה "נדחסת" כלפי מטה.</p>
+            <div class="stage-title">יעד פיתוח 03 — אפיון תנאי מעבר לרגישות אווירודינמית</div>
+            <p class="stage-desc">בחינת נקודות המעבר שבהן דחיסת שכבת הגבול והעלייה בלחצים מעבירות את הבליטה מאזור נסתר להשפעה אווירודינמית פעילה.</p>
         </div>
         <div class="stage-card">
             <span class="stage-num">04</span>
-            <div class="stage-title">כשל תרמו-מבני</div>
-            <p class="stage-desc">הקוץ נחשף לזרימה החופשית, מעורר טורבולנציה ויוצר זינוק אדיר בטמפרטורה (Max-Q).</p>
+            <div class="stage-title">יעד פיתוח 04 — בחינת כשל תרמי־מבני יזום</div>
+            <p class="stage-desc">הערכת המנגנון שבו חשיפת הבליטה לזרימה החופשית עשויה להוביל להעצמת חימום, טורבולנציה וכשל תרמי־מבני בתנאי מעטפת מוגדרים.</p>
         </div>
     </div>
 
     <section class="simulation-section">
+        <div style="color:#a9bfd7;font-size:0.92rem;line-height:1.7;margin-bottom:14px;">
+            ההדמיות התיאורטיות המופיעות כאן מבוססות על המודל שפותח, וממחישות מנגנון שכבר נותח ברמה פיזיקלית־תיאורטית לצד פרמטרי בסיס ראשוניים.
+        </div>
         <div class="tabs-header">
             <button class="tab-btn active" onclick="openTab(event, 'tab1')">סימולציית הדבקה (שלב 1)</button>
             <button class="tab-btn" onclick="openTab(event, 'tab2')">סימולציית זרימה וכשל (שלב 4)</button>
@@ -320,7 +323,7 @@
     <div style="flex:1;min-width:260px;">
       <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(109,240,194,0.3);border-radius:999px;color:#6df0c2;font-size:0.82rem;background:rgba(109,240,194,0.06);margin-bottom:16px;letter-spacing:0.03em;">✦ הזדמנות לשותפות מדעית</div>
       <div style="font-size:1.35rem;font-weight:700;color:#eaf4ff;margin-bottom:10px;line-height:1.3;">מחפש שותפים לדרך</div>
-      <div style="font-size:0.97rem;color:#a9bfd7;line-height:1.75;max-width:560px;">אני בשלב גיבוש הבורד ומחפש שותפים לדרך, שמאמינים בקידום ההגנה על המולדת — אנשי מדע, הנדסה ואסטרטגיה שרוצים להיות חלק ממשהו משמעותי.</div>
+      <div style="font-size:0.97rem;color:#a9bfd7;line-height:1.75;max-width:560px;">אנחנו בשלב מעבר מתיקוף פיזיקלי־תיאורטי לשלב האימות ההנדסי, ומחפשים שותפים לדרך — אנשי מדע, הנדסה ואסטרטגיה שירצו לבנות יחד את שלב המימוש הבא.</div>
     </div>
     <a href="about.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:#04131d;background:linear-gradient(135deg,#7fd4ff,#6df0c2);padding:14px 24px;border-radius:16px;font-weight:700;font-size:0.95rem;box-shadow:0 10px 28px rgba(109,240,194,0.2);white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">היכרות עם היזם ←</a>
   </div>
