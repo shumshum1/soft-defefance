@@ -204,6 +204,107 @@
             display: none;
         }
 
+
+        .tab-content.engineering-tab {
+            height: auto;
+            min-height: 700px;
+            background: #0d1016;
+            padding: 18px;
+        }
+
+        .sk-wrap {
+            direction: rtl;
+            font-family: 'Heebo', sans-serif;
+            display: grid;
+            gap: 14px;
+            color: #e6eefb;
+        }
+
+        .sk-top {
+            background: linear-gradient(155deg, #111723, #0c1018);
+            border: 1px solid rgba(106, 154, 220, 0.3);
+            border-radius: 16px;
+            padding: 16px;
+        }
+
+        .sk-top h3 { margin: 0 0 8px 0; font-size: 1.25rem; color: #ecf4ff; }
+        .sk-top p { margin: 0; color: #9eb3d5; }
+
+        .sk-grid {
+            display: grid;
+            grid-template-columns: minmax(280px, 390px) 1fr;
+            gap: 14px;
+        }
+
+        .sk-card {
+            background: #141b28;
+            border: 1px solid #2b3a56;
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .sk-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-weight: 700;
+            color: #d7e6ff;
+        }
+
+        .sk-value { color: #86c4ff; }
+        .sk-range { width: 100%; accent-color: #3a8fdd; }
+
+        .sk-math { display: grid; gap: 8px; margin-top: 10px; }
+
+        .sk-eq {
+            background: #0f1521;
+            border: 1px solid #2a3650;
+            border-radius: 10px;
+            padding: 8px 10px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+            color: #d9e8ff;
+        }
+
+        .sk-eq .sym { color: #7ec7ff; }
+        .sk-eq .num { color: #ffd084; font-weight: 700; }
+
+        .sk-canvas-box {
+            background: #070b11;
+            border: 1px solid #273652;
+            border-radius: 12px;
+            padding: 8px;
+            position: relative;
+            min-height: 360px;
+        }
+
+        #skCanvas {
+            width: 100%;
+            height: 460px;
+            display: block;
+            border-radius: 10px;
+            background: radial-gradient(circle at 25% 50%, #111a29, #06080c 72%);
+        }
+
+        .sk-legend {
+            position: absolute;
+            left: 14px;
+            top: 14px;
+            padding: 8px 10px;
+            border: 1px solid #293548;
+            border-radius: 10px;
+            background: rgba(7, 10, 16, 0.84);
+            font-size: 0.78rem;
+            line-height: 1.45;
+            color: #d4e0f4;
+            pointer-events: none;
+            max-width: 250px;
+        }
+
+        @media (max-width: 960px) {
+            .sk-grid { grid-template-columns: 1fr; }
+            #skCanvas { height: 390px; }
+        }
+
         footer {
             text-align: center;
             padding: 40px;
@@ -214,13 +315,13 @@
 </head>
 <body>
 
-    <nav style="position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(7,17,31,0.96);border-bottom:1px solid rgba(120,170,220,0.18);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:52px;font-family:'Segoe UI',Arial,sans-serif;direction:rtl;">
+    <nav style="position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(7,17,31,0.96);border-bottom:1px solid rgba(120,170,220,0.18);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:10px 14px;padding:10px 28px;min-height:68px;font-family:'Segoe UI',Arial,sans-serif;direction:rtl;flex-wrap:wrap;">
     <a href="index.html" style="color:#7fd4ff;text-decoration:none;font-weight:700;font-size:0.9rem;display:flex;align-items:center;gap:8px;"><span style="color:#6df0c2;font-size:1.1rem;">◈</span> Smart Atmospheric Shield</a>
-    <div style="display:flex;gap:4px;">
-      <a href="כימיה.HTML" style="color:#a9bfd7;text-decoration:none;padding:6px 14px;border-radius:999px;font-size:0.82rem;border:1px solid transparent;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">כימיה והדבקה</a>
-      <a href="softKill.HTML" style="color:#a9bfd7;text-decoration:none;padding:6px 14px;border-radius:999px;font-size:0.82rem;border:1px solid transparent;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">אווירונאוטיקה</a>
-      <a href="מבצעי.HTML" style="color:#a9bfd7;text-decoration:none;padding:6px 14px;border-radius:999px;font-size:0.82rem;border:1px solid transparent;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">מבצעי</a>
-      <a href="about.html" style="color:#a9bfd7;text-decoration:none;padding:6px 14px;border-radius:999px;font-size:0.82rem;border:1px solid transparent;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">About</a>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+      <a href="כימיה.HTML" style="color:#a9bfd7;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:0.86rem;border:1px solid transparent;line-height:1.2;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">כימיה והדבקה</a>
+      <a href="softKill.HTML" style="color:#a9bfd7;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:0.86rem;border:1px solid transparent;line-height:1.2;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">אווירונאוטיקה</a>
+      <a href="מבצעי.HTML" style="color:#a9bfd7;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:0.86rem;border:1px solid transparent;line-height:1.2;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">מבצעי</a>
+      <a href="about.html" style="color:#a9bfd7;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:0.86rem;border:1px solid transparent;line-height:1.2;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">About</a>
     </div>
   </nav>
 
@@ -269,6 +370,7 @@
         <div class="tabs-header">
             <button class="tab-btn active" onclick="openTab(event, 'tab1')">סימולציית הדבקה (שלב 1)</button>
             <button class="tab-btn" onclick="openTab(event, 'tab2')">סימולציית זרימה וכשל (שלב 4)</button>
+            <button class="tab-btn" onclick="openTab(event, 'tab3')">דשבורד חדירת חלקיק (חדש)</button>
         </div>
 
         <div id="tab1" class="tab-content active">
@@ -284,6 +386,43 @@
             </div>
             <iframe id="sim2"></iframe>
         </div>
+
+        <div id="tab3" class="tab-content engineering-tab">
+            <div class="sk-wrap">
+                <div class="sk-top">
+                    <h3>דשבורד אינטראקטיבי: חדירת חלקיק מרוכב 75μm דרך גל הלם</h3>
+                    <p>שליטה בזמן אמת בפרמטרים, עדכון נוסחאות, והדמיית Canvas של פגיעת חלקיק בדופן הטיל.</p>
+                </div>
+
+                <div class="sk-grid">
+                    <div class="sk-card">
+                        <div class="sk-label"><span>מהירות הטיל (Mach)</span><span class="sk-value" id="skMachValue">6.0</span></div>
+                        <input class="sk-range" id="skMach" type="range" min="3" max="15" step="0.1" value="6" />
+
+                        <div class="sk-label" style="margin-top:12px;"><span>מרחק גל ההלם (ס״מ)</span><span class="sk-value" id="skDistanceValue">5.0</span></div>
+                        <input class="sk-range" id="skDistance" type="range" min="1" max="20" step="0.1" value="5" />
+
+                        <div class="sk-math" aria-live="polite">
+                            <div class="sk-eq" id="skEqV"></div>
+                            <div class="sk-eq" id="skEqT"></div>
+                            <div class="sk-eq" id="skEqTemp"></div>
+                            <div class="sk-eq" id="skEqAblated"></div>
+                        </div>
+                    </div>
+
+                    <div class="sk-canvas-box">
+                        <canvas id="skCanvas" width="900" height="460"></canvas>
+                        <div class="sk-legend">
+                            • קיר ימין: דופן הטיל<br>
+                            • אזור צבעוני: גל ההלם (עובי לפי מרחק)<br>
+                            • נקודה בהירה: חלקיק מרוכב<br>
+                            • שובל עשן: אבלציה בתוך גל ההלם בלבד
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </section>
 </div>
 
@@ -314,6 +453,137 @@
         iframe.style.display = "block";
         placeholder.style.display = "none";
     }
+
+    function initParticleDashboard() {
+        const machSlider = document.getElementById('skMach');
+        const distanceSlider = document.getElementById('skDistance');
+        const canvas = document.getElementById('skCanvas');
+        if (!machSlider || !distanceSlider || !canvas) return;
+
+        const machValue = document.getElementById('skMachValue');
+        const distanceValue = document.getElementById('skDistanceValue');
+        const eqV = document.getElementById('skEqV');
+        const eqT = document.getElementById('skEqT');
+        const eqTemp = document.getElementById('skEqTemp');
+        const eqAblated = document.getElementById('skEqAblated');
+
+        const ctx = canvas.getContext('2d');
+        const state = { mach: 6, distance: 5, v: 0, t: 0, T: 0, ablated: 0 };
+        const smoke = [];
+        let particleX = 24;
+        let prev = performance.now();
+
+        const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+        const lerp = (a, b, t) => a + (b - a) * t;
+        const fmt = (n, d = 2) => Number(n).toLocaleString('he-IL', { minimumFractionDigits: d, maximumFractionDigits: d });
+
+        function shockColor(temp) {
+            const n = clamp((temp - 360) / (9000 - 360), 0, 1);
+            const r = Math.round(lerp(255, 200, n));
+            const g = Math.round(lerp(225, 236, n));
+            const b = Math.round(lerp(70, 255, n));
+            return `rgba(${r},${g},${b},${lerp(0.34,0.66,n)})`;
+        }
+
+        function updateMath() {
+            state.mach = Number(machSlider.value);
+            state.distance = Number(distanceSlider.value);
+            state.v = state.mach * 310;
+            state.t = (state.distance * 10) / state.v;
+            state.T = 40 * state.mach * state.mach;
+            state.ablated = (state.T / 1000) * state.t * 1.5;
+
+            machValue.textContent = fmt(state.mach, 1);
+            distanceValue.textContent = fmt(state.distance, 1);
+            eqV.innerHTML = `<span class="sym">v</span> = Mach × 310 = <span class="num">${fmt(state.v,1)}</span> m/s`;
+            eqT.innerHTML = `<span class="sym">t</span> = (Distance × 10) / v = <span class="num">${fmt(state.t,5)}</span> ms`;
+            eqTemp.innerHTML = `<span class="sym">T</span> = 40 × Mach<sup>2</sup> = <span class="num">${fmt(state.T,1)}</span> °C`;
+            eqAblated.innerHTML = `ablated = (T / 1000) × t × 1.5 = <span class="num">${fmt(state.ablated,6)}</span> μm`;
+        }
+
+        function resize() {
+            const r = canvas.getBoundingClientRect();
+            const dpr = Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = Math.floor(r.width * dpr);
+            canvas.height = Math.floor(r.height * dpr);
+            ctx.setTransform(1,0,0,1,0,0);
+            ctx.scale(dpr,dpr);
+        }
+
+        function draw(dt) {
+            const w = canvas.clientWidth;
+            const h = canvas.clientHeight;
+            const wallX = w - 78;
+            const wallWidth = 24;
+            const zoneWidth = 36 + ((state.distance - 1) / 19) * 280;
+            const zoneStart = wallX - zoneWidth;
+            const y = h * 0.54;
+
+            ctx.clearRect(0, 0, w, h);
+
+            ctx.strokeStyle = 'rgba(96,120,170,0.08)';
+            for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+            for (let yy = 0; yy < h; yy += 40) { ctx.beginPath(); ctx.moveTo(0,yy); ctx.lineTo(w,yy); ctx.stroke(); }
+
+            const col = shockColor(state.T);
+            const grd = ctx.createLinearGradient(zoneStart, 0, wallX, 0);
+            grd.addColorStop(0, 'rgba(255,220,80,0.08)');
+            grd.addColorStop(0.65, col);
+            grd.addColorStop(1, 'rgba(245,252,255,0.45)');
+            ctx.fillStyle = grd;
+            ctx.fillRect(zoneStart, 0, zoneWidth, h);
+
+            ctx.fillStyle = '#9fb8d8';
+            ctx.fillRect(wallX, 0, wallWidth, h);
+            ctx.fillStyle = '#e8f1ff';
+            ctx.fillRect(wallX + wallWidth - 4, 0, 4, h);
+
+            particleX += (120 + state.mach * 45) * dt;
+            if (particleX > wallX - 4) { particleX = 22; smoke.length = 0; }
+
+            const inShock = particleX >= zoneStart && particleX <= wallX;
+            if (inShock) {
+                smoke.push({x: particleX - 3, y: y + (Math.random() - 0.5) * 8, life: 1, s: 1 + Math.random() * 2.2});
+            }
+            for (let i = smoke.length - 1; i >= 0; i--) {
+                smoke[i].life -= dt * 1.35;
+                smoke[i].x -= (18 + state.mach * 4) * dt;
+                if (smoke[i].life <= 0) smoke.splice(i, 1);
+            }
+            for (const p of smoke) {
+                ctx.beginPath();
+                ctx.fillStyle = `rgba(210,220,240,${p.life * 0.35})`;
+                ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.beginPath();
+            ctx.fillStyle = '#f7fbff';
+            ctx.shadowColor = inShock ? col : 'rgba(130,180,255,0.45)';
+            ctx.shadowBlur = inShock ? 18 : 8;
+            ctx.arc(particleX, y, 5.4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        function frame(ts) {
+            const dt = Math.min((ts - prev) / 1000, 0.033);
+            prev = ts;
+            draw(dt);
+            requestAnimationFrame(frame);
+        }
+
+        machSlider.addEventListener('input', updateMath);
+        distanceSlider.addEventListener('input', updateMath);
+        window.addEventListener('resize', resize);
+
+        updateMath();
+        resize();
+        requestAnimationFrame((t) => { prev = t; frame(t); });
+    }
+
+    initParticleDashboard();
+
 </script>
 
 <!-- PARTNERSHIP SECTION -->
@@ -321,7 +591,7 @@
   <div style="background:linear-gradient(135deg,rgba(10,18,32,0.92),rgba(7,14,26,0.88));border:1px solid rgba(127,212,255,0.2);border-radius:24px;padding:40px 44px;box-shadow:0 20px 60px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:28px;position:relative;overflow:hidden;">
     <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(109,240,194,0.12),transparent 65%);pointer-events:none;"></div>
     <div style="flex:1;min-width:260px;">
-      <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(109,240,194,0.3);border-radius:999px;color:#6df0c2;font-size:0.82rem;background:rgba(109,240,194,0.06);margin-bottom:16px;letter-spacing:0.03em;">✦ הזדמנות לשותפות מדעית</div>
+      <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(109,240,194,0.3);border-radius:999px;color:#6df0c2;font-size:0.82rem;background:rgba(109,240,194,0.06);margin-bottom:16px;letter-spacing:0.03em;">✦ הזדמנות לשותפות</div>
       <div style="font-size:1.35rem;font-weight:700;color:#eaf4ff;margin-bottom:10px;line-height:1.3;">מחפש שותפים לדרך</div>
       <div style="font-size:0.97rem;color:#a9bfd7;line-height:1.75;max-width:560px;">אנחנו בשלב מעבר מתיקוף פיזיקלי־תיאורטי לשלב האימות ההנדסי, ומחפשים שותפים לדרך — אנשי מדע, הנדסה ואסטרטגיה שירצו לבנות יחד את שלב המימוש הבא.</div>
     </div>
