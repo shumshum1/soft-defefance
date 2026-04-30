@@ -1,661 +1,75 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>מגן אטמוספרי חכם - מערכת הגנה נפחית</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Hebrew:wght@300;400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg: #0f1117;
-    --surface: #181c26;
-    --surface2: #1e2230;
-    --border: rgba(255,255,255,0.08);
-    --border2: rgba(255,255,255,0.14);
-    --text: #e8eaf0;
-    --text-muted: #7a8096;
-    --text-dim: #4a5068;
-    --accent: #3a8fdd;
-    --accent-alert: #D85A30;
-    --accent-time: #2dd4a0;
-    --font: 'IBM Plex Sans Hebrew', sans-serif;
-    --mono: 'IBM Plex Mono', monospace;
-    --radius: 6px;
-    --radius-lg: 10px;
-  }
-
-  body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 13px; line-height: 1.6; min-height: 100vh; padding: 30px; }
-  
-  /* --- Intro Section --- */
-  .intro-container { max-width: 1000px; margin: 0 auto 30px auto; background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 30px; }
-  .intro-container h1 { font-size: 24px; color: var(--accent); margin-bottom: 4px; font-weight: 700;}
-  .intro-container h2 { font-size: 16px; color: var(--text-muted); margin-bottom: 24px; font-weight: 400;}
-  .intro-text p { margin-bottom: 12px; font-size: 14px; color: #c4c8d4;}
-  .intro-text strong { color: var(--text); }
-  .intro-highlight { margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); font-style: italic; color: var(--accent-time); text-align: center; font-size: 15px;}
-
-  /* --- Tabs --- */
-  .tabs-nav { max-width: 1200px; margin: 0 auto 20px auto; display: flex; gap: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; }
-  .tab-btn { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); padding: 12px 24px; border-radius: var(--radius) var(--radius) 0 0; cursor: pointer; font-family: var(--font); font-size: 14px; font-weight: 500; transition: all 0.2s; }
-  .tab-btn:hover { background: var(--border); color: var(--text); }
-  .tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
-  
-  .tab-content { display: none; max-width: 1200px; margin: 0 auto; animation: fadeIn 0.3s ease; }
-  .tab-content.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-  /* --- Shared Simulator Styles --- */
-  .sim-title { font-size: 20px; font-weight: 500; margin-bottom: 4px; }
-  .sim-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
-  .layout { display: grid; grid-template-columns: 260px 1fr 140px; gap: 16px; align-items: start; }
-  .controls { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-  .ctrl-section-title { font-size: 11px; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 10px; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); }
-  .ctrl-group { display: flex; flex-direction: column; gap: 12px; }
-  .ctrl-item { display: flex; flex-direction: column; gap: 4px; }
-  .ctrl-header { display: flex; justify-content: space-between; align-items: baseline; }
-  .ctrl-label { font-size: 11px; color: var(--text-muted); }
-  .ctrl-val { font-family: var(--mono); font-size: 12px; font-weight: 500; color: var(--accent); }
-  input[type=range] { -webkit-appearance: none; width: 100%; height: 3px; background: var(--border2); border-radius: 2px; outline: none; cursor: pointer; }
-  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); border: 2px solid var(--bg); cursor: pointer; transition: transform 0.15s; }
-  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
-  .canvas-area { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 12px; }
-  .canvas-wrap { display: flex; justify-content: center; align-items: center; min-height: 400px; position: relative; background: #0b0c10; border: 1px dashed var(--border); border-radius: var(--radius); overflow: hidden; cursor: crosshair; }
-  canvas { display: block; }
-  .axis-label { position: absolute; font-size: 9px; color: var(--text-dim); font-family: var(--mono); }
-  .interaction-hint { position: absolute; top: 10px; left: 0; right: 0; text-align: center; font-size: 10px; color: rgba(255,255,255,0.4); pointer-events: none; }
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
-  .stat { background: var(--surface2); border-radius: var(--radius); padding: 10px; border: 0.5px solid var(--border); }
-  .stat-label { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
-  .stat-val { font-family: var(--mono); font-size: 16px; font-weight: 500; color: var(--text); }
-  .stat-alert { border-color: rgba(216, 90, 48, 0.4); background: rgba(216, 90, 48, 0.05); }
-  .legend-panel { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-  .legend-section-title { font-size: 10px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 8px; padding-bottom: 6px; border-bottom: 0.5px solid var(--border); }
-  .legend-gradient-wrap { display: flex; gap: 8px; align-items: stretch; }
-  .legend-gradient-bar { width: 14px; border-radius: 3px; flex-shrink: 0; min-height: 250px; }
-  .legend-ticks { display: flex; flex-direction: column; justify-content: space-between; flex: 1; }
-  .legend-tick { display: flex; align-items: center; gap: 4px; }
-  .tick-line { width: 6px; height: 0.5px; background: var(--border2); flex-shrink: 0; }
-  .tick-val { font-family: var(--mono); font-size: 10px; color: var(--text-muted); white-space: nowrap; }
-  .formulas { background: var(--surface); border: 0.5px solid var(--border2); border-radius: var(--radius-lg); padding: 12px 16px; grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
-  .formula-box { font-size: 11px; color: var(--text-muted); }
-  .f-title { font-weight: 700; color: var(--accent); margin-bottom: 2px; }
-  .f-math { font-family: var(--mono); font-size: 12px; color: var(--text); direction: ltr; text-align: left; background: var(--surface2); padding: 4px 8px; border-radius: 4px; border: 1px solid var(--border); margin: 4px 0;}
-  
-  /* Specific tweaks for Sim 1 */
-  #canvas-wrap1 { min-height: 350px; cursor: default; }
-  #lg-density1, #lg-hits1 { min-height: 160px; }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>פיזור מצרר ודיפוזיה בזמן</title>
+  <style>
+    :root { --bg:#0f1117; --panel:#181c26; --panel2:#202636; --text:#e8eaf0; --muted:#9ea8c2; --border:rgba(255,255,255,.14); }
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Arial,sans-serif;min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+    header{padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(24,28,38,.9)} h1{margin:0;font-size:1.05rem}.sub{margin-top:6px;font-size:.88rem;color:var(--muted)}
+    .layout{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:12px;min-height:0}.canvas-wrap,.controls{background:var(--panel);border:1px solid var(--border);border-radius:14px}
+    .canvas-wrap{position:relative;overflow:hidden;min-height:470px} canvas{width:100%;height:100%;display:block;background:radial-gradient(circle at center,#162030 0%,#0b111a 55%,#070a10 100%)}
+    .hud{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}.chip{background:rgba(8,11,17,.78);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:7px 10px;font-size:.82rem;max-width:58%;line-height:1.35}
+    .controls{padding:14px;display:grid;gap:12px;align-content:start}.field label{display:flex;justify-content:space-between;color:var(--muted);font-size:.86rem;margin-bottom:4px}input[type=range]{width:100%}
+    .btn{border:1px solid var(--border);border-radius:12px;padding:11px;background:var(--panel2);color:var(--text);cursor:pointer;font-weight:600}.btn:hover{border-color:rgba(255,255,255,.28)}
+    .metrics{border-top:1px dashed rgba(255,255,255,.2);padding-top:10px;display:grid;gap:8px}.metric{background:#141a27;border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:8px}.k{color:var(--muted);font-size:.75rem}.v{margin-top:2px;font-size:1rem;font-weight:700}
+    .legend{border-top:1px dashed rgba(255,255,255,.2);padding-top:10px;color:var(--muted);font-size:.8rem;line-height:1.45}.bar{height:10px;border-radius:999px;margin-top:6px;background:linear-gradient(90deg,#2a4cff 0%,#00cfff 40%,#8eff7a 65%,#ffd84d 82%,#ff5a38 100%)}
+    @media (max-width:980px){.layout{grid-template-columns:1fr}.canvas-wrap{min-height:360px}}
+  </style>
 </head>
 <body>
-
-  <nav style="position:fixed;top:0;left:0;right:0;z-index:9999;background:rgba(7,17,31,0.96);border-bottom:1px solid rgba(120,170,220,0.18);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:10px 14px;padding:10px 28px;min-height:68px;font-family:'Segoe UI',Arial,sans-serif;direction:rtl;flex-wrap:wrap;">
-    <a href="index.html" style="color:#7fd4ff;text-decoration:none;font-weight:700;font-size:0.9rem;display:flex;align-items:center;gap:8px;"><span style="color:#6df0c2;font-size:1.1rem;">◈</span> Smart Atmospheric Shield</a>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
-      <a href="כימיה.HTML" style="color:#a9bfd7;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:0.86rem;border:1px solid transparent;line-height:1.2;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">כימיה והדבקה</a>
-      <a href="softKill.HTML" style="color:#a9bfd7;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:0.86rem;border:1px solid transparent;line-height:1.2;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">אווירונאוטיקה</a>
-      <a href="מבצעי.HTML" style="color:#a9bfd7;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:0.86rem;border:1px solid transparent;line-height:1.2;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">מבצעי</a>
-      <a href="about.html" style="color:#a9bfd7;text-decoration:none;padding:8px 16px;border-radius:999px;font-size:0.86rem;border:1px solid transparent;line-height:1.2;" onmouseover="this.style.color='#7fd4ff';this.style.borderColor='rgba(127,212,255,0.3)'" onmouseout="this.style.color='#a9bfd7';this.style.borderColor='transparent'">About</a>
-    </div>
-  </nav>
-
-<div class="intro-container" style="margin-top:72px;">
-  <h1>מגן אטמוספרי חכם (Smart Atmospheric Shield)</h1>
-  <h2>הגנה נפחית א-סימטרית מול איומים היפרסוניים (Shooting T.R.A.C.K Concept)</h2>
-  <div class="intro-text">
-    <p><strong>הצורך המבצעי:</strong> מערכות ההגנה האווירית הקיימות (Hit-to-Kill) מתקשות להתמודד עם מטחים כבדים (MIRV) ועם איומים מתמרנים (HGV) המעקרים את יכולת החיזוי הקינטית, כל זאת תוך יחס עלות-תועלת שלילי (מיירט יקר מול איום זול).</p>
-    <p><strong>הפתרון – מפת פיתוח להגנה נפחית מתמשכת:</strong> במקום ליירט טיל בודד בנקודה מחושבת, הפיתוח מכוון לבחינה, תכן ואימות של "מחסום נפחי זמני" בסטרטופאוזה (גובה 40-60 ק"מ). זהו אינו רעיון תאורטי בלבד: הבסיס הפיזיקלי של המנגנון כבר נבחן, והצטברו נתוני יסוד יציבים התומכים בכיוון הפעולה.</p>
-    <p><strong>שרשרת השפעה מוצעת (Kill Chain) — נותחה תאורטית ונכנסת לאימות הנדסי:</strong> <br>
-      1. <strong>חדירה והיצמדות:</strong> המודל נועד לבחון באילו תנאים חלקיקים חוצים גל הלם ונצמדים למגן החום.<br>
-      2. <strong>שיבוש אווירודינמי:</strong> נבחנת האפשרות ליצירת חספוס מבוקר שמסיט את הזרימה הלמינרית לכיוון טורבולנטי.<br>
-      3. <strong>כשל תרמי-מבני יזום:</strong> נבחנים תחומי מעטפת שבהם מעבר הזרימה עשוי להוביל לעלייה חדה בשטף החום ולפגיעה מבנית.</p>
-    <p><strong>ערך אסטרטגי בפיתוח:</strong> פוטנציאל לקטלניות מתמשכת (Dwell Time), לשחיקת יכולת תמרון ולהיגיון כלכלי א-סימטרי — תוך המשך פיתוח ניסויי ויישומי, ואימות הדרגתי של ביצועים ומעטפות עבודה.</p>
-  </div>
-  <div class="intro-highlight">
-    המודל שפותח קיבל ביטוי בהדמיות תיאורטיות המופיעות בדף: סימולטור פיזור ראשוני וסימולטור דיפוזיה/קטלניות, הממחישים היתכנות וקשרי פרמטרים שכבר נבחנו ברמת היסוד.
-  </div>
-</div>
-
-<div class="tabs-nav">
-  <button class="tab-btn active" onclick="openTab('tab-sim1', this)">מצב פיזור ראשוני (חתך סטטי)</button>
-  <button class="tab-btn" onclick="openTab('tab-sim2', this)">מודל דיפוזיה וקטלניות מרחבית (זמן אמת)</button>
-</div>
-
-<div id="tab-sim1" class="tab-content active">
-  <h2 class="sim-title">מודל צפיפות ופגיעות בסיסי (t=0)</h2>
-  <p class="sim-subtitle">הדמיית הסתברות פגיעה בראש קרבי במעבר דרך חתך הענן ברגע הפריסה, בהנחת פיזור אחיד (Uniform).</p>
-
-  <div class="layout">
-    <div class="controls">
-      <div>
-        <div class="ctrl-section-title">פרמטרי הפריסה</div>
-        <div class="ctrl-item">
-          <div class="ctrl-header">
-            <span class="ctrl-label">מסת מטען צנוח</span>
-            <span class="ctrl-val" id="lbl-mass1">50 ק"ג</span>
-          </div>
-          <input type="range" id="ctrl-mass1" min="10" max="100" value="50" step="5">
-        </div>
-      </div>
-      <div>
-        <div class="ctrl-section-title">מידות הענן (נפח חסום)</div>
-        <div class="ctrl-group">
-          <div class="ctrl-item">
-            <div class="ctrl-header">
-              <span class="ctrl-label">שטח (רוחב × אורך)</span>
-              <span class="ctrl-val" id="lbl-area1">30 קמ"ר</span>
-            </div>
-            <input type="range" id="ctrl-area1" min="5" max="50" value="30" step="1">
-          </div>
-          <div class="ctrl-item">
-            <div class="ctrl-header">
-              <span class="ctrl-label">עומק / עובי הענן</span>
-              <span class="ctrl-val" id="lbl-depth1">50 מטר</span>
-            </div>
-            <input type="range" id="ctrl-depth1" min="10" max="150" value="50" step="5">
-          </div>
-        </div>
-      </div>
-      <div>
-        <div class="ctrl-section-title">נתוני איום נכנס</div>
-        <div class="ctrl-item">
-          <div class="ctrl-header">
-            <span class="ctrl-label">שטח חתך (טיל)</span>
-            <span class="ctrl-val" id="lbl-missile1">1.0 מ"ר</span>
-          </div>
-          <input type="range" id="ctrl-missile1" min="0.5" max="2.0" value="1.0" step="0.1">
-        </div>
-      </div>
-    </div>
-
-    <div class="canvas-area">
-      <div class="canvas-wrap" id="canvas-wrap1">
-        <canvas id="viz1"></canvas>
-      </div>
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">סך חלקיקים בענן</div>
-          <div class="stat-val" id="stat-particles1">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">נפח כולל (מיליוני מ"ק)</div>
-          <div class="stat-val" id="stat-vol1">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">ריכוז (חלקיקים למ"ק)</div>
-          <div class="stat-val" id="stat-dens1">—</div>
-        </div>
-        <div class="stat stat-alert">
-          <div class="stat-label" style="color: #D85A30;">פגיעות צפויות ודאיות</div>
-          <div class="stat-val" id="stat-hits1" style="color: #D85A30; font-weight: 700;">—</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="legend-panel">
-      <div>
-        <div class="legend-section-title">צפיפות נפחית (C)</div>
-        <div class="legend-gradient-wrap">
-          <canvas id="lg-density1" class="legend-gradient-bar" width="14"></canvas>
-          <div class="legend-ticks" id="ticks-density1"></div>
-        </div>
-        <div style="font-size: 9px; color: var(--text-dim); margin-top: 4px;">חלקיקים למ"ק</div>
-      </div>
-      <div style="margin-top: 10px;">
-        <div class="legend-section-title">הצטברות פגיעות (λ)</div>
-        <div class="legend-gradient-wrap">
-          <canvas id="lg-hits1" class="legend-gradient-bar" width="14"></canvas>
-          <div class="legend-ticks" id="ticks-hits1"></div>
-        </div>
-        <div style="font-size: 9px; color: var(--text-dim); margin-top: 4px;">מספר פגיעות בטיל</div>
-      </div>
-    </div>
-
-    <div class="formulas">
-      <div class="formula-box">
-        <div class="f-title">1. סך חלקיקים במערכת</div>
-        <div class="f-math">N = M_{total} / 1.76e^{-9}</div>
-        <div style="font-size:10px;">מסת מטען חלקי מסת חלקיק בודד (פולימר).</div>
-      </div>
-      <div class="formula-box">
-        <div class="f-title">2. ריכוז התחלתי (Uniform)</div>
-        <div class="f-math">C_0 = N / (Area × Depth)</div>
-        <div style="font-size:10px;">חישוב צפיפות אחידה בתוך נפח התיבה החסומה.</div>
-      </div>
-      <div class="formula-box">
-        <div class="f-title">3. פגיעות מצטברות בנתיב</div>
-        <div class="f-math">λ = C_0 × A_{missile} × Depth</div>
-        <div style="font-size:10px;">הריכוז מוכפל בנפח הגליל שחורץ הטיל במהלך חציית הענן.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div id="tab-sim2" class="tab-content">
-  <h2 class="sim-title">דיפוזיה וקטלניות מרחבית (Lethality Map)</h2>
-  <p class="sim-subtitle">לחץ על מפת הענן כדי למקם טיל ולחשב פגיעות נקודתיות על בסיס ריכוז ועומק דינמי.</p>
-
-  <div class="layout">
-    <div class="controls">
-      <div>
-        <div class="ctrl-section-title">זמן באוויר (Dwell Time)</div>
-        <div class="ctrl-item">
-          <div class="ctrl-header"><span class="ctrl-label">שעות מהפריסה</span><span class="ctrl-val" id="lbl-time2">0 ש'</span></div>
-          <input type="range" id="ctrl-time2" min="0" max="24" value="0" step="0.5">
-          <style>#ctrl-time2::-webkit-slider-thumb { background: var(--accent-time); } #lbl-time2 { color: var(--accent-time); font-weight: 700;}</style>
-        </div>
-      </div>
-      <div style="margin-top: 4px;">
-        <div class="ctrl-section-title">תצורה התחלתית</div>
-        <div class="ctrl-group">
-          <div class="ctrl-item">
-            <div class="ctrl-header"><span class="ctrl-label">מסת מטען (ק"ג)</span><span class="ctrl-val" id="lbl-mass2">150 ק"ג</span></div>
-            <input type="range" id="ctrl-mass2" min="10" max="500" value="150" step="10">
-          </div>
-          <div class="ctrl-item">
-            <div class="ctrl-header"><span class="ctrl-label">שטח מרובע (קמ"ר)</span><span class="ctrl-val" id="lbl-area2">30 קמ"ר</span></div>
-            <input type="range" id="ctrl-area2" min="5" max="100" value="30" step="5">
-          </div>
-          <div class="ctrl-item">
-            <div class="ctrl-header"><span class="ctrl-label">עומק Z התחלתי</span><span class="ctrl-val" id="lbl-depth2">50 מטר</span></div>
-            <input type="range" id="ctrl-depth2" min="10" max="150" value="50" step="5">
-          </div>
-          <div class="ctrl-item">
-            <div class="ctrl-header"><span class="ctrl-label">גזירת רוח (%/ש')</span><span class="ctrl-val" id="lbl-wind2">10%</span></div>
-            <input type="range" id="ctrl-wind2" min="0" max="30" value="10" step="1">
-          </div>
-          <div class="ctrl-item" style="margin-top: 8px; padding-top: 8px; border-top: 0.5px solid var(--border);">
-            <div class="ctrl-header"><span class="ctrl-label">שטח חתך טיל</span><span class="ctrl-val" id="lbl-missile2">1.0 מ"ר</span></div>
-            <input type="range" id="ctrl-missile2" min="0.5" max="3.0" value="1.0" step="0.1">
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="canvas-area">
-      <div class="canvas-wrap" id="canvas-wrap2">
-        <canvas id="viz2" width="400" height="400"></canvas>
-        <div class="interaction-hint">← לחץ על הענן כדי למדוד חציית טיל בנקודה →</div>
-        <div class="axis-label" style="top: 8px; left: 8px;">10km-</div>
-        <div class="axis-label" style="bottom: 8px; right: 8px;">+10km</div>
-      </div>
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">סך חלקיקים פעילים (N)</div>
-          <div class="stat-val" id="stat-particles2">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">עומק נוכחי חושב (Z)</div>
-          <div class="stat-val" id="stat-z2">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">צפיפות (בנקודת הבדיקה)</div>
-          <div class="stat-val" id="stat-local-dens2" style="color: #BA7517;">—</div>
-        </div>
-        <div class="stat stat-alert">
-          <div class="stat-label" style="color: #D85A30;">פגיעות בטיל (נקודתי)</div>
-          <div class="stat-val" id="stat-hits2" style="color: #D85A30; font-weight: 700;">—</div>
-        </div>
-      </div>
-    </div>
-
-    <div class="legend-panel">
-      <div>
-        <div class="legend-section-title">צפיפות אבסולוטית (C)</div>
-        <div class="legend-gradient-wrap">
-          <canvas id="lg-density2" class="legend-gradient-bar" width="14"></canvas>
-          <div class="legend-ticks" id="ticks-density2"></div>
-        </div>
-        <div style="font-size: 9px; color: var(--text-dim); margin-top: 6px; line-height: 1.2;">חלקיקים לכל 1 מ"ק.<br>(הסולם המקסימלי מקובע ל-400).</div>
-      </div>
-    </div>
-
-    <div class="formulas">
-      <div class="formula-box">
-        <div class="f-title">1. ריכוז אבסולוטי (גאוסיאני)</div>
-        <div class="f-math">C(x,y,t) = W_{gauss} × (N / V_t)</div>
-        <div style="font-size:10px;">פיזור פונקציית משקל על בסיס התרחבות הענן מגזירת הרוח, מנורמל לשימור מסת חלקיקים.</div>
-      </div>
-      <div class="formula-box">
-        <div class="f-title">2. מודל התכווצות (שקיעה)</div>
-        <div class="f-math">Z(t) = Z_0 × e^{-k·t}</div>
-        <div style="font-size:10px;">חוק סטוקס לאוויר דליל. דחיסת העומק מעלה את הצפיפות הנפחית C למרות הדיפוזיה.</div>
-      </div>
-      <div class="formula-box">
-        <div class="f-title">3. פגיעות ודאיות (אינטגרל)</div>
-        <div class="f-math">λ = C(x,y,t) × A_{mis} × Z(t)</div>
-        <div style="font-size:10px;">הכפלת הריכוז המקומי בנקודת החציה בשטח חתך הטיל, כפול עומק חציית הענן Z.</div>
-      </div>
-    </div>
-  </div>
-</div>
-
+<header>
+  <h1>פיזור מצרר ודיפוזיה בזמן</h1>
+  <div class="sub">שלב 1: פיזור ראשוני במהירות 40 מ׳/ש׳ (פצצונות+חלקיקים). שלב 2: דיפוזיה חופשית עד 1 מ׳/ש׳.</div>
+</header>
+<main class="layout">
+  <section class="canvas-wrap"><canvas id="c"></canvas><div class="hud"><div class="chip" id="status">מוכן להרצה.</div><div class="chip" id="clock">זמן: 0.0ש׳ | שלב: המתנה</div></div></section>
+  <aside class="controls">
+    <div class="field"><label><span>נפח מטען (ליטר)</span><strong id="payloadVal">60</strong></label><input id="payload" type="range" min="30" max="100" step="1" value="60"/></div>
+    <div class="field"><label><span>מספר פצצונות</span><strong id="subsVal">80</strong></label><input id="subs" type="range" min="10" max="300" step="1" value="80"/></div>
+    <button class="btn" id="simBtn">Simulate</button><button class="btn" id="resetBtn">Reset</button>
+    <section class="metrics">
+      <div class="metric"><div class="k">נפח חלקיק יחיד (45μm) בליטר</div><div class="v" id="particleLiters">—</div></div>
+      <div class="metric"><div class="k">סה"כ חלקיקים (70% מהמטען)</div><div class="v" id="total">—</div></div>
+      <div class="metric"><div class="k">חלקיקים לכל פצצונת</div><div class="v" id="perSub">—</div></div>
+      <div class="metric"><div class="k">כיסוי שטח נוכחי (%)</div><div class="v" id="coverage">0.00%</div></div>
+    </section>
+    <section class="legend">מפת צבעים לריכוז: כחול נמוך ← אדום גבוה.<div class="bar"></div></section>
+  </aside>
+</main>
 <script>
-// --- Tabs Logic ---
-function openTab(tabId, btn) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById(tabId).classList.add('active');
-  btn.classList.add('active');
-}
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+const payload=document.getElementById('payload'),subs=document.getElementById('subs');
+const payloadVal=document.getElementById('payloadVal'),subsVal=document.getElementById('subsVal');
+const particleLitersEl=document.getElementById('particleLiters'),totalEl=document.getElementById('total'),perSubEl=document.getElementById('perSub'),coverageEl=document.getElementById('coverage');
+const statusEl=document.getElementById('status'),clockEl=document.getElementById('clock');
+const MAIN_R_M=1000,TIME_SCALE=10,INITIAL_SPEED_MPS=40,DIFFUSION_MAX_MPS=1,INITIAL_PHASE_SIM_SEC=2.5;
+const PARTICLE_DIAMETER_M=45e-6,PARTICLE_RADIUS_M=PARTICLE_DIAMETER_M/2;
+const PARTICLE_VOLUME_L=(4/3*Math.PI*Math.pow(PARTICLE_RADIUS_M,3))*1000;
+let center={x:0,y:0},pxPerM=1,mainRPx=1; let simTime=0,running=false; let clouds=[];
 
-// Global Shared Constants
-const PARTICLE_MASS_KG = 1.76e-9; 
+function resize(){const r=canvas.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;canvas.width=Math.floor(r.width*dpr);canvas.height=Math.floor(r.height*dpr);canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(dpr,0,0,dpr,0,0);center.x=r.width/2;center.y=r.height/2;mainRPx=Math.min(r.width,r.height)*0.43;pxPerM=mainRPx/MAIN_R_M;}
+function randomPointInCircle(rad){const t=Math.random()*Math.PI*2,u=Math.random()+Math.random(),rr=(u>1?2-u:u)*rad;return{x:center.x+Math.cos(t)*rr,y:center.y+Math.sin(t)*rr};}
+function metrics(){const p=Number(payload.value),n=Number(subs.value),particleVolume=PARTICLE_VOLUME_L,totalParticles=(p*0.7)/particleVolume,perSub=totalParticles/n;payloadVal.textContent=p;subsVal.textContent=n;particleLitersEl.textContent=particleVolume.toExponential(3);totalEl.textContent=totalParticles.toExponential(3);perSubEl.textContent=perSub.toExponential(3);return{n,totalParticles,perSub};}
+function colorByDensity(t){t=Math.max(0,Math.min(1,t));const h=230-220*t,l=60-10*t;return `hsla(${h},95%,${l}%,${0.16+0.58*t})`;}
 
-// ==========================================
-// SIMULATOR 1 LOGIC (Baseline Cross-section)
-// ==========================================
-(function() {
-  const canvas = document.getElementById('viz1');
-  const ctx = canvas.getContext('2d');
-  const MAX_W = 600, MAX_H = 320, PAD = 40;
+function buildSimulation(){const {n,perSub}=metrics();clouds=[];simTime=0;const particlesPerCloud=Math.max(8,Math.min(130,Math.round(Math.log10(perSub+10)*20)));for(let i=0;i<n;i++){const target=randomPointInCircle(mainRPx);const ang=Math.atan2(target.y-center.y,target.x-center.x);const sub={x:center.x,y:center.y,vx:Math.cos(ang)*INITIAL_SPEED_MPS*pxPerM,vy:Math.sin(ang)*INITIAL_SPEED_MPS*pxPerM,targetX:target.x,targetY:target.y,particles:[],density:perSub};for(let j=0;j<particlesPerCloud;j++){const pa=Math.random()*Math.PI*2;sub.particles.push({x:center.x,y:center.y,vx:Math.cos(pa)*INITIAL_SPEED_MPS*pxPerM,vy:Math.sin(pa)*INITIAL_SPEED_MPS*pxPerM});}clouds.push(sub);}running=true;statusEl.textContent='שלב פיזור ראשוני החל: פצצונות וחלקיקים נעים ב-40 מ׳/ש׳.';}
 
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function lerpColor(c0, c1, t) {
-    const p = x => parseInt(x, 16);
-    const h2 = h => h.replace('#','');
-    const a = h2(c0), b = h2(c1);
-    const r = Math.round(lerp(p(a.slice(0,2)), p(b.slice(0,2)), t));
-    const g = Math.round(lerp(p(a.slice(2,4)), p(b.slice(2,4)), t));
-    const bl = Math.round(lerp(p(a.slice(4,6)), p(b.slice(4,6)), t));
-    return '#' + [r,g,bl].map(x => x.toString(16).padStart(2,'0')).join('');
-  }
+function estimateCoverage(){if(!clouds.length){coverageEl.textContent='0.00%';return;}const stepM=20,stepPx=stepM*pxPerM,hitR=6;let total=0,hit=0;for(let y=-mainRPx;y<=mainRPx;y+=stepPx){for(let x=-mainRPx;x<=mainRPx;x+=stepPx){if(x*x+y*y>mainRPx*mainRPx)continue;total++;const gx=center.x+x,gy=center.y+y;let occupied=false;for(const c of clouds){for(const p of c.particles){const dx=gx-p.x,dy=gy-p.y;if(dx*dx+dy*dy<hitR*hitR){occupied=true;break;}}if(occupied)break;}if(occupied)hit++;}}const pct=total?hit/total*100:0;coverageEl.textContent=pct.toFixed(2)+'%';}
 
-  const DENSITY_RAMP = [ [0,'#0d1b2f'], [0.25,'#185FA5'], [0.5,'#BA7517'], [0.75,'#D85A30'], [1,'#8B1A1A'] ];
-  const HITS_RAMP = [ [0,'#3a8fdd'], [0.4,'#e2a72e'], [0.8,'#D85A30'], [1,'#ff2a00'] ];
+function update(dt){const simDt=dt*TIME_SCALE;simTime+=simDt;const phase=simTime<INITIAL_PHASE_SIM_SEC?'פיזור ראשוני':'דיפוזיה';clockEl.textContent=`זמן: ${simTime.toFixed(1)}ש׳ | שלב: ${phase}`;
+for(const c of clouds){if(simTime<INITIAL_PHASE_SIM_SEC){c.x+=c.vx*simDt;c.y+=c.vy*simDt;const toT=Math.hypot(c.targetX-c.x,c.targetY-c.y);if(toT<6){c.vx*=0.2;c.vy*=0.2;}for(const p of c.particles){p.x+=p.vx*simDt;p.y+=p.vy*simDt;}}
+else{c.vx*=0.92;c.vy*=0.92;for(const p of c.particles){p.vx+=(Math.random()-.5)*0.08*simDt;p.vy+=(Math.random()-.5)*0.08*simDt;const sp=Math.hypot(p.vx,p.vy),max=DIFFUSION_MAX_MPS*pxPerM;if(sp>max){const k=max/sp;p.vx*=k;p.vy*=k;}p.x+=p.vx*simDt;p.y+=p.vy*simDt;}}}
+if(simTime>=INITIAL_PHASE_SIM_SEC&&statusEl.textContent.indexOf('דיפוזיה')===-1){statusEl.textContent='שלב הדיפוזיה: החלקיקים מתפזרים חופשי עד 1 מ׳/ש׳, והכיסוי מתעדכן בזמן אמת.';}
+estimateCoverage();}
 
-  function rampColor(ramp, t) {
-    t = Math.max(0, Math.min(1, t));
-    for (let i = 0; i < ramp.length - 1; i++) {
-      const [t0, c0] = ramp[i], [t1, c1] = ramp[i+1];
-      if (t >= t0 && t <= t1) return lerpColor(c0, c1, (t - t0) / (t1 - t0));
-    }
-    return ramp[ramp.length-1][1];
-  }
+function draw(){const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);ctx.strokeStyle='rgba(255,255,255,.05)';for(let x=0;x<w;x+=52){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}for(let y=0;y<h;y+=52){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+ctx.beginPath();ctx.arc(center.x,center.y,mainRPx,0,Math.PI*2);ctx.strokeStyle='rgba(120,190,255,.45)';ctx.lineWidth=1.8;ctx.stroke();
+if(!clouds.length)return;const maxD=Math.max(...clouds.map(c=>c.density));ctx.save();ctx.globalCompositeOperation='lighter';for(const c of clouds){const n=c.density/maxD;for(const p of c.particles){const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,3.6);g.addColorStop(0,colorByDensity(n));g.addColorStop(1,'rgba(255,80,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,3.6,0,Math.PI*2);ctx.fill();}}ctx.restore();}
 
-  function getParams1() {
-    return {
-      mass: +document.getElementById('ctrl-mass1').value,
-      area: +document.getElementById('ctrl-area1').value,
-      depth: +document.getElementById('ctrl-depth1').value,
-      missileA: +document.getElementById('ctrl-missile1').value,
-    };
-  }
-
-  function draw1() {
-    const { mass, area, depth, missileA } = getParams1();
-    const totalParticles = mass / PARTICLE_MASS_KG; 
-    const volumeM3 = area * 1000000 * depth; 
-    const concentration = totalParticles / volumeM3; 
-    const expectedHits = concentration * missileA * depth; 
-
-    const visualW = 100 + (area / 50) * (MAX_W - 100);
-    const visualH = 80 + (depth / 150) * (MAX_H - 80);
-    canvas.width = visualW + PAD*2; canvas.height = visualH + PAD*2;
-    const rx = PAD, ry = PAD;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    const densityRatio = Math.min(1, Math.sqrt(concentration / 200)); 
-    const fillColor = rampColor(DENSITY_RAMP, densityRatio);
-
-    ctx.fillStyle = fillColor; ctx.globalAlpha = 0.25; ctx.fillRect(rx, ry, visualW, visualH);
-    ctx.globalAlpha = 1; ctx.strokeStyle = fillColor; ctx.lineWidth = 1.5; ctx.strokeRect(rx, ry, visualW, visualH);
-
-    const SEGS = 100;
-    let hitsArr = [];
-    for (let i = 0; i <= SEGS; i++) hitsArr.push(expectedHits * (i / SEGS)); 
-
-    const lx = rx + visualW * 0.5; 
-    const lw = 6; 
-
-    for (let i = 0; i < SEGS; i++) {
-      const y0 = ry + (i / SEGS) * visualH, y1 = ry + ((i+1) / SEGS) * visualH;
-      const ratio = expectedHits > 0 ? hitsArr[i] / expectedHits : 0;
-      ctx.beginPath(); ctx.moveTo(lx, y0); ctx.lineTo(lx, y1);
-      ctx.strokeStyle = rampColor(HITS_RAMP, ratio); ctx.lineWidth = lw; ctx.stroke();
-    }
-    
-    ctx.beginPath(); ctx.moveTo(lx, ry + visualH + 5); ctx.lineTo(lx - 8, ry + visualH - 10); ctx.lineTo(lx + 8, ry + visualH - 10);
-    ctx.fillStyle = rampColor(HITS_RAMP, 1); ctx.fill();
-
-    ctx.fillStyle = '#7a8096'; ctx.font = '13px IBM Plex Sans Hebrew, sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(`שטח כיסוי: ${area} קמ"ר`, rx + visualW/2, ry - 15);
-    ctx.save(); ctx.translate(rx - 20, ry + visualH/2); ctx.rotate(-Math.PI/2); ctx.fillText(`עומק הענן: ${depth} מטר`, 0, 0); ctx.restore();
-
-    document.getElementById('stat-particles1').textContent = (totalParticles / 1e9).toFixed(1) + 'B';
-    document.getElementById('stat-vol1').textContent = (volumeM3 / 1000000).toLocaleString();
-    document.getElementById('stat-dens1').textContent = concentration.toFixed(1);
-    document.getElementById('stat-hits1').textContent = Math.round(expectedHits).toLocaleString();
-
-    updateLegends1(concentration, expectedHits);
-  }
-
-  function buildGradientCanvas(canvasId, ramp, height) {
-    const lc = document.getElementById(canvasId); lc.height = height; const lctx = lc.getContext('2d');
-    for (let y = 0; y < height; y++) { lctx.fillStyle = rampColor(ramp, y / (height - 1)); lctx.fillRect(0, y, 14, 1); }
-  }
-
-  function buildTicks(containerId, minVal, maxVal, steps, format) {
-    const el = document.getElementById(containerId); el.innerHTML = '';
-    for (let i = 0; i <= steps; i++) {
-      const val = minVal + (maxVal - minVal) * (i / steps);
-      const div = document.createElement('div'); div.className = 'legend-tick';
-      div.innerHTML = `<span class="tick-line"></span><span class="tick-val">${format(val)}</span>`;
-      el.appendChild(div);
-    }
-  }
-
-  function updateLegends1(concentration, expectedHits) {
-    const LH = 160;
-    buildGradientCanvas('lg-density1', DENSITY_RAMP, LH);
-    buildGradientCanvas('lg-hits1', HITS_RAMP, LH);
-    buildTicks('ticks-density1', 0, 200, 4, v => v === 200 ? '200+' : Math.round(v));
-    buildTicks('ticks-hits1', 0, expectedHits, 4, v => Math.round(v).toLocaleString());
-  }
-
-  ['mass', 'area', 'depth', 'missile'].forEach(id => {
-    const el = document.getElementById('ctrl-'+id+'1'), lbl = document.getElementById('lbl-'+id+'1');
-    el.addEventListener('input', () => { 
-      lbl.textContent = el.value + (id==='mass'?' ק"ג':id==='area'?' קמ"ר':id==='depth'?' מטר':' מ"ר'); 
-      draw1(); 
-    });
-  });
-
-  window.addEventListener('load', draw1);
-})();
-
-// ==========================================
-// SIMULATOR 2 LOGIC (Dynamic Top-Down Heatmap)
-// ==========================================
-(function() {
-  const canvas = document.getElementById('viz2');
-  const ctx = canvas.getContext('2d');
-  const wrap = document.getElementById('canvas-wrap2');
-
-  const GRID_SIZE_KM = 20; 
-  const CANVAS_SIZE = 400; 
-  const METERS_PER_PIXEL = (GRID_SIZE_KM * 1000) / CANVAS_SIZE; 
-  const BASE_DECAY = 0.05;
-  const ABSOLUTE_MAX_DENSITY = 400; 
-
-  let targetX = CANVAS_SIZE / 2;
-  let targetY = CANVAS_SIZE / 2;
-
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function lerpColorRaw(c0, c1, t) {
-    const p = x => parseInt(x, 16);
-    const a = c0.replace('#',''), b = c1.replace('#','');
-    return [
-      Math.round(lerp(p(a.slice(0,2)), p(b.slice(0,2)), t)),
-      Math.round(lerp(p(a.slice(2,4)), p(b.slice(2,4)), t)),
-      Math.round(lerp(p(a.slice(4,6)), p(b.slice(4,6)), t)),
-      255
-    ];
-  }
-
-  const DENSITY_RAMP = [ [0,'#0b0c10'], [0.02,'#0d1b2f'], [0.15,'#185FA5'], [0.4,'#BA7517'], [0.7,'#D85A30'], [1,'#e51b1b'] ];
-
-  function getRampColorRaw(t) {
-    t = Math.max(0, Math.min(1, t));
-    for (let i = 0; i < DENSITY_RAMP.length - 1; i++) {
-      const [t0, c0] = DENSITY_RAMP[i], [t1, c1] = DENSITY_RAMP[i+1];
-      if (t >= t0 && t <= t1) return lerpColorRaw(c0, c1, (t - t0) / (t1 - t0));
-    }
-    return [229, 27, 27, 255];
-  }
-
-  function getParams2() {
-    return {
-      time: +document.getElementById('ctrl-time2').value,
-      mass: +document.getElementById('ctrl-mass2').value,
-      area: +document.getElementById('ctrl-area2').value,
-      depth: +document.getElementById('ctrl-depth2').value,
-      wind: +document.getElementById('ctrl-wind2').value,
-      missileA: +document.getElementById('ctrl-missile2').value,
-    };
-  }
-
-  let lastCalculatedGrid = null; 
-  let lastDensityMultiplier = 0;
-
-  function computeGrid() {
-    const p = getParams2();
-    const N = p.mass / PARTICLE_MASS_KG;
-    const L0_meters = Math.sqrt(p.area) * 1000; 
-    const current_Z = p.depth * Math.exp(-BASE_DECAY * p.time); 
-
-    const L0_px = L0_meters / METERS_PER_PIXEL;
-    const half_L = L0_px / 2;
-    const sigma_px = (L0_meters * (p.wind / 100) * p.time) / METERS_PER_PIXEL;
-    
-    const imgData = ctx.createImageData(CANVAS_SIZE, CANVAS_SIZE);
-    const data = imgData.data;
-    const cx = CANVAS_SIZE / 2, cy = CANVAS_SIZE / 2;
-    
-    let weightGrid = new Float32Array(CANVAS_SIZE * CANVAS_SIZE);
-    let totalWeight = 0;
-    
-    for (let y = 0; y < CANVAS_SIZE; y++) {
-      for (let x = 0; x < CANVAS_SIZE; x++) {
-        const dx = Math.max(0, Math.abs(x - cx) - half_L);
-        const dy = Math.max(0, Math.abs(y - cy) - half_L);
-        const dist2 = dx*dx + dy*dy;
-        
-        let weight = 0;
-        if (p.time === 0) { weight = (dist2 === 0) ? 1 : 0; } 
-        else { weight = Math.exp(-dist2 / (2 * Math.pow(Math.max(sigma_px, 0.1), 2))); }
-        
-        weightGrid[y * CANVAS_SIZE + x] = weight;
-        totalWeight += weight;
-      }
-    }
-
-    const pixelArea_M2 = METERS_PER_PIXEL * METERS_PER_PIXEL;
-    const densityMultiplier = N / (totalWeight * pixelArea_M2 * current_Z);
-    
-    for (let i = 0; i < weightGrid.length; i++) {
-      const localDensity = weightGrid[i] * densityMultiplier;
-      const densityRatio = Math.min(1, localDensity / ABSOLUTE_MAX_DENSITY);
-      const rgba = getRampColorRaw(densityRatio);
-      const pxIndex = i * 4;
-      data[pxIndex] = rgba[0]; data[pxIndex+1] = rgba[1]; data[pxIndex+2] = rgba[2]; data[pxIndex+3] = 255;
-    }
-
-    ctx.putImageData(imgData, 0, 0);
-
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(0, cy); ctx.lineTo(CANVAS_SIZE, cy); ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, CANVAS_SIZE); ctx.stroke();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; ctx.strokeRect(cx - half_L, cy - half_L, L0_px, L0_px);
-
-    lastCalculatedGrid = weightGrid; lastDensityMultiplier = densityMultiplier;
-    updateTarget(); 
-  }
-
-  function updateTarget() {
-    const p = getParams2();
-    const current_Z = p.depth * Math.exp(-BASE_DECAY * p.time); 
-    
-    const tx = Math.max(0, Math.min(CANVAS_SIZE-1, Math.round(targetX)));
-    const ty = Math.max(0, Math.min(CANVAS_SIZE-1, Math.round(targetY)));
-    
-    let localDensity = 0;
-    if (lastCalculatedGrid) {
-      localDensity = lastCalculatedGrid[ty * CANVAS_SIZE + tx] * lastDensityMultiplier;
-    }
-    const expectedHits = localDensity * p.missileA * current_Z;
-
-    ctx.beginPath(); ctx.arc(tx, ty, 6, 0, Math.PI * 2); ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5; ctx.stroke();
-    ctx.beginPath(); ctx.moveTo(tx - 10, ty); ctx.lineTo(tx + 10, ty); ctx.moveTo(tx, ty - 10); ctx.lineTo(tx, ty + 10); ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.stroke();
-
-    document.getElementById('stat-particles2').textContent = ((p.mass / PARTICLE_MASS_KG) / 1e9).toFixed(1) + 'B';
-    document.getElementById('stat-z2').textContent = current_Z.toFixed(1) + " מ'";
-    document.getElementById('stat-local-dens2').textContent = localDensity.toFixed(1);
-    document.getElementById('stat-hits2').textContent = Math.round(expectedHits).toLocaleString();
-
-    updateLegend2();
-  }
-
-  let isDragging = false;
-  wrap.addEventListener('mousedown', e => { isDragging = true; setTarget(e); });
-  window.addEventListener('mousemove', e => { if(isDragging) setTarget(e); });
-  window.addEventListener('mouseup', () => { isDragging = false; });
-  wrap.addEventListener('touchstart', e => { isDragging = true; setTarget(e.touches[0]); }, {passive:true});
-  window.addEventListener('touchmove', e => { if(isDragging) setTarget(e.touches[0]); }, {passive:true});
-  window.addEventListener('touchend', () => { isDragging = false; });
-
-  function setTarget(e) {
-    const rect = canvas.getBoundingClientRect();
-    targetX = (e.clientX - rect.left) * (CANVAS_SIZE / rect.width);
-    targetY = (e.clientY - rect.top) * (CANVAS_SIZE / rect.height);
-    computeGrid(); 
-  }
-
-  function updateLegend2() {
-    const lc = document.getElementById('lg-density2'); const lctx = lc.getContext('2d'); const height = lc.height = 250;
-    for (let y = 0; y < height; y++) {
-      const rgba = getRampColorRaw(1 - (y / (height - 1)));
-      lctx.fillStyle = `rgb(${rgba[0]},${rgba[1]},${rgba[2]})`; lctx.fillRect(0, y, 14, 1);
-    }
-    const el = document.getElementById('ticks-density2'); el.innerHTML = '';
-    for (let i = 0; i <= 4; i++) {
-      const val = ABSOLUTE_MAX_DENSITY - (ABSOLUTE_MAX_DENSITY * (i / 4));
-      const div = document.createElement('div'); div.className = 'legend-tick';
-      div.innerHTML = `<span class="tick-line"></span><span class="tick-val">${val === ABSOLUTE_MAX_DENSITY ? val+'+' : Math.round(val)}</span>`;
-      el.appendChild(div);
-    }
-  }
-
-  ['time', 'mass', 'area', 'depth', 'wind', 'missile'].forEach(id => {
-    const el = document.getElementById('ctrl-'+id+'2'), lbl = document.getElementById('lbl-'+id+'2');
-    el.addEventListener('input', () => {
-      if(id==='time') lbl.textContent = `${parseFloat(el.value) % 1 === 0 ? +el.value : parseFloat(el.value).toFixed(1)} ש'`;
-      else if(id==='mass') lbl.textContent = el.value + ' ק"ג';
-      else if(id==='area') lbl.textContent = el.value + ' קמ"ר';
-      else if(id==='depth') lbl.textContent = el.value + ' מטר';
-      else if(id==='wind') lbl.textContent = el.value + '%';
-      else if(id==='missile') lbl.textContent = el.value + ' מ"ר';
-      computeGrid();
-    });
-  });
-
-  window.addEventListener('load', computeGrid);
-})();
+function reset(){clouds=[];simTime=0;running=false;statusEl.textContent='מוכן להרצה.';clockEl.textContent='זמן: 0.0ש׳ | שלב: המתנה';coverageEl.textContent='0.00%';metrics();}
+let last=performance.now();function loop(t){const dt=Math.min(.04,(t-last)/1000);last=t;draw();if(running)update(dt);requestAnimationFrame(loop);}payload.addEventListener('input',metrics);subs.addEventListener('input',metrics);document.getElementById('simBtn').addEventListener('click',buildSimulation);document.getElementById('resetBtn').addEventListener('click',reset);window.addEventListener('resize',resize);resize();metrics();requestAnimationFrame(loop);
 </script>
-
-<!-- PARTNERSHIP SECTION -->
-<div style="max-width:1200px;margin:60px auto 0;padding:0 28px 60px;direction:rtl;">
-  <div style="background:linear-gradient(135deg,rgba(10,18,32,0.92),rgba(7,14,26,0.88));border:1px solid rgba(127,212,255,0.2);border-radius:24px;padding:40px 44px;box-shadow:0 20px 60px rgba(0,0,0,0.4);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:28px;position:relative;overflow:hidden;">
-    <div style="position:absolute;top:-60px;right:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(109,240,194,0.12),transparent 65%);pointer-events:none;"></div>
-    <div style="flex:1;min-width:260px;">
-      <div style="display:inline-flex;align-items:center;gap:8px;padding:6px 14px;border:1px solid rgba(109,240,194,0.3);border-radius:999px;color:#6df0c2;font-size:0.82rem;background:rgba(109,240,194,0.06);margin-bottom:16px;letter-spacing:0.03em;">✦ הזדמנות לשותפות</div>
-      <div style="font-size:1.35rem;font-weight:700;color:#eaf4ff;margin-bottom:10px;line-height:1.3;">מחפש שותפים לדרך</div>
-      <div style="font-size:0.97rem;color:#a9bfd7;line-height:1.75;max-width:560px;">אני בשלב גיבוש הבורד ומחפש שותפים לדרך, שמאמינים בקידום ההגנה על המולדת — אנשי מדע, הנדסה ואסטרטגיה שרוצים להיות חלק ממשהו משמעותי.</div>
-    </div>
-    <a href="about.html" style="display:inline-flex;align-items:center;gap:10px;text-decoration:none;color:#04131d;background:linear-gradient(135deg,#7fd4ff,#6df0c2);padding:14px 24px;border-radius:16px;font-weight:700;font-size:0.95rem;box-shadow:0 10px 28px rgba(109,240,194,0.2);white-space:nowrap;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">היכרות עם היזם ←</a>
-  </div>
-</div>
-
 </body>
 </html>
