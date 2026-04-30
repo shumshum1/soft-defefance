@@ -3,73 +3,354 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>פיזור מצרר ודיפוזיה בזמן</title>
+  <title>סימולציית מצרר - דיפוזיה וריכוז</title>
   <style>
-    :root { --bg:#0f1117; --panel:#181c26; --panel2:#202636; --text:#e8eaf0; --muted:#9ea8c2; --border:rgba(255,255,255,.14); }
-    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Arial,sans-serif;min-height:100vh;display:grid;grid-template-rows:auto 1fr}
-    header{padding:14px 18px;border-bottom:1px solid var(--border);background:rgba(24,28,38,.9)} h1{margin:0;font-size:1.05rem}.sub{margin-top:6px;font-size:.88rem;color:var(--muted)}
-    .layout{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:12px;min-height:0}.canvas-wrap,.controls{background:var(--panel);border:1px solid var(--border);border-radius:14px}
-    .canvas-wrap{position:relative;overflow:hidden;min-height:470px} canvas{width:100%;height:100%;display:block;background:radial-gradient(circle at center,#162030 0%,#0b111a 55%,#070a10 100%)}
-    .hud{position:absolute;top:10px;left:10px;right:10px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}.chip{background:rgba(8,11,17,.78);border:1px solid rgba(255,255,255,.2);border-radius:10px;padding:7px 10px;font-size:.82rem;max-width:58%;line-height:1.35}
-    .controls{padding:14px;display:grid;gap:12px;align-content:start}.field label{display:flex;justify-content:space-between;color:var(--muted);font-size:.86rem;margin-bottom:4px}input[type=range]{width:100%}
-    .btn{border:1px solid var(--border);border-radius:12px;padding:11px;background:var(--panel2);color:var(--text);cursor:pointer;font-weight:600}.btn:hover{border-color:rgba(255,255,255,.28)}
-    .metrics{border-top:1px dashed rgba(255,255,255,.2);padding-top:10px;display:grid;gap:8px}.metric{background:#141a27;border:1px solid rgba(255,255,255,.09);border-radius:10px;padding:8px}.k{color:var(--muted);font-size:.75rem}.v{margin-top:2px;font-size:1rem;font-weight:700}
-    .legend{border-top:1px dashed rgba(255,255,255,.2);padding-top:10px;color:var(--muted);font-size:.8rem;line-height:1.45}.bar{height:10px;border-radius:999px;margin-top:6px;background:linear-gradient(90deg,#2a4cff 0%,#00cfff 40%,#8eff7a 65%,#ffd84d 82%,#ff5a38 100%)}
-    @media (max-width:980px){.layout{grid-template-columns:1fr}.canvas-wrap{min-height:360px}}
+    :root {
+      --bg: #0f1117;
+      --panel: #181c26;
+      --panel2: #202636;
+      --text: #e8eaf0;
+      --muted: #9ea8c2;
+      --border: rgba(255,255,255,0.14);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: "Segoe UI", Arial, sans-serif;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+    header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(24,28,38,.9);
+    }
+    h1 { margin: 0; font-size: 1.05rem; }
+    .sub { margin-top: 6px; font-size: .88rem; color: var(--muted); }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr 345px;
+      gap: 12px;
+      padding: 12px;
+      min-height: 0;
+    }
+    .canvas-wrap, .controls {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+    }
+    .canvas-wrap { position: relative; overflow: hidden; min-height: 470px; }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: radial-gradient(circle at center, #161f2d 0%, #0b111a 56%, #070a10 100%);
+    }
+    .hud {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      display: flex;
+      gap: 8px;
+      justify-content: space-between;
+      pointer-events: none;
+    }
+    .chip {
+      background: rgba(8,11,17,.78);
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 10px;
+      padding: 7px 10px;
+      font-size: .82rem;
+      max-width: 56%;
+      line-height: 1.35;
+    }
+
+    .controls { padding: 14px; display: grid; gap: 12px; align-content: start; }
+    .field label { display: flex; justify-content: space-between; color: var(--muted); font-size: .86rem; margin-bottom: 4px; }
+    input[type=range] { width: 100%; }
+    .btn {
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 11px;
+      background: var(--panel2);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 600;
+    }
+    .btn:hover { border-color: rgba(255,255,255,.28); }
+
+    .metrics { border-top: 1px dashed rgba(255,255,255,.2); padding-top: 10px; display: grid; gap: 8px; }
+    .metric { background: #141a27; border: 1px solid rgba(255,255,255,.09); border-radius: 10px; padding: 8px; }
+    .k { color: var(--muted); font-size: .75rem; }
+    .v { margin-top: 2px; font-size: 1rem; font-weight: 700; }
+    .legend {
+      border-top: 1px dashed rgba(255,255,255,.2);
+      padding-top: 10px;
+      color: var(--muted);
+      font-size: .8rem;
+      line-height: 1.45;
+    }
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      margin-top: 6px;
+      background: linear-gradient(90deg, #2a4cff 0%, #00cfff 40%, #8eff7a 65%, #ffd84d 82%, #ff5a38 100%);
+    }
+
+    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .canvas-wrap{min-height:360px;} }
   </style>
 </head>
 <body>
-<header>
-  <h1>פיזור מצרר ודיפוזיה בזמן</h1>
-  <div class="sub">שלב 1: פיזור ראשוני במהירות 40 מ׳/ש׳ (פצצונות+חלקיקים). שלב 2: דיפוזיה חופשית עד 1 מ׳/ש׳.</div>
-</header>
-<main class="layout">
-  <section class="canvas-wrap"><canvas id="c"></canvas><div class="hud"><div class="chip" id="status">מוכן להרצה.</div><div class="chip" id="clock">זמן: 0.0ש׳ | שלב: המתנה</div></div></section>
-  <aside class="controls">
-    <div class="field"><label><span>נפח מטען (ליטר)</span><strong id="payloadVal">60</strong></label><input id="payload" type="range" min="30" max="100" step="1" value="60"/></div>
-    <div class="field"><label><span>מספר פצצונות</span><strong id="subsVal">80</strong></label><input id="subs" type="range" min="10" max="300" step="1" value="80"/></div>
-    <button class="btn" id="simBtn">Simulate</button><button class="btn" id="resetBtn">Reset</button>
-    <section class="metrics">
-      <div class="metric"><div class="k">נפח חלקיק יחיד (45μm) בליטר</div><div class="v" id="particleLiters">—</div></div>
-      <div class="metric"><div class="k">סה"כ חלקיקים (70% מהמטען)</div><div class="v" id="total">—</div></div>
-      <div class="metric"><div class="k">חלקיקים לכל פצצונת</div><div class="v" id="perSub">—</div></div>
-      <div class="metric"><div class="k">כיסוי שטח נוכחי (%)</div><div class="v" id="coverage">0.00%</div></div>
+  <header>
+    <h1>פיזור מצרר ודיפוזיה בזמן</h1>
+    <div class="sub">שלב 1: פיזור מיידי מהמצרר עד 30 מ׳. שלב 2: דיפוזיה חופשית במרחב במהירות עד 1 מטר/שנייה.</div>
+  </header>
+
+  <main class="layout">
+    <section class="canvas-wrap">
+      <canvas id="c"></canvas>
+      <div class="hud">
+        <div class="chip" id="status">מוכן להרצה.</div>
+        <div class="chip" id="clock">זמן סימולציה: 0.0 שניות</div>
+      </div>
     </section>
-    <section class="legend">מפת צבעים לריכוז: כחול נמוך ← אדום גבוה.<div class="bar"></div></section>
-  </aside>
-</main>
-<script>
-const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
-const payload=document.getElementById('payload'),subs=document.getElementById('subs');
-const payloadVal=document.getElementById('payloadVal'),subsVal=document.getElementById('subsVal');
-const particleLitersEl=document.getElementById('particleLiters'),totalEl=document.getElementById('total'),perSubEl=document.getElementById('perSub'),coverageEl=document.getElementById('coverage');
-const statusEl=document.getElementById('status'),clockEl=document.getElementById('clock');
-const MAIN_R_M=1000,TIME_SCALE=10,INITIAL_SPEED_MPS=40,DIFFUSION_MAX_MPS=1,INITIAL_PHASE_SIM_SEC=2.5;
-const PARTICLE_DIAMETER_M=45e-6,PARTICLE_RADIUS_M=PARTICLE_DIAMETER_M/2;
-const PARTICLE_VOLUME_L=(4/3*Math.PI*Math.pow(PARTICLE_RADIUS_M,3))*1000;
-let center={x:0,y:0},pxPerM=1,mainRPx=1; let simTime=0,running=false; let clouds=[];
 
-function resize(){const r=canvas.parentElement.getBoundingClientRect(),dpr=window.devicePixelRatio||1;canvas.width=Math.floor(r.width*dpr);canvas.height=Math.floor(r.height*dpr);canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(dpr,0,0,dpr,0,0);center.x=r.width/2;center.y=r.height/2;mainRPx=Math.min(r.width,r.height)*0.43;pxPerM=mainRPx/MAIN_R_M;}
-function randomPointInCircle(rad){const t=Math.random()*Math.PI*2,u=Math.random()+Math.random(),rr=(u>1?2-u:u)*rad;return{x:center.x+Math.cos(t)*rr,y:center.y+Math.sin(t)*rr};}
-function metrics(){const p=Number(payload.value),n=Number(subs.value),particleVolume=PARTICLE_VOLUME_L,totalParticles=(p*0.7)/particleVolume,perSub=totalParticles/n;payloadVal.textContent=p;subsVal.textContent=n;particleLitersEl.textContent=particleVolume.toExponential(3);totalEl.textContent=totalParticles.toExponential(3);perSubEl.textContent=perSub.toExponential(3);return{n,totalParticles,perSub};}
-function colorByDensity(t){t=Math.max(0,Math.min(1,t));const h=230-220*t,l=60-10*t;return `hsla(${h},95%,${l}%,${0.16+0.58*t})`;}
+    <aside class="controls">
+      <div class="field">
+        <label><span>נפח מטען (ליטר)</span><strong id="payloadVal">60</strong></label>
+        <input id="payload" type="range" min="30" max="100" step="1" value="60" />
+      </div>
+      <div class="field">
+        <label><span>מספר פצצונות</span><strong id="subsVal">80</strong></label>
+        <input id="subs" type="range" min="10" max="300" step="1" value="80" />
+      </div>
 
-function buildSimulation(){const {n,perSub}=metrics();clouds=[];simTime=0;const particlesPerCloud=Math.max(8,Math.min(130,Math.round(Math.log10(perSub+10)*20)));for(let i=0;i<n;i++){const target=randomPointInCircle(mainRPx);const ang=Math.atan2(target.y-center.y,target.x-center.x);const sub={x:center.x,y:center.y,vx:Math.cos(ang)*INITIAL_SPEED_MPS*pxPerM,vy:Math.sin(ang)*INITIAL_SPEED_MPS*pxPerM,targetX:target.x,targetY:target.y,particles:[],density:perSub};for(let j=0;j<particlesPerCloud;j++){const pa=Math.random()*Math.PI*2;sub.particles.push({x:center.x,y:center.y,vx:Math.cos(pa)*INITIAL_SPEED_MPS*pxPerM,vy:Math.sin(pa)*INITIAL_SPEED_MPS*pxPerM});}clouds.push(sub);}running=true;statusEl.textContent='שלב פיזור ראשוני החל: פצצונות וחלקיקים נעים ב-40 מ׳/ש׳.';}
+      <button class="btn" id="simBtn">Simulate</button>
+      <button class="btn" id="resetBtn">Reset</button>
 
-function estimateCoverage(){if(!clouds.length){coverageEl.textContent='0.00%';return;}const stepM=20,stepPx=stepM*pxPerM,hitR=6;let total=0,hit=0;for(let y=-mainRPx;y<=mainRPx;y+=stepPx){for(let x=-mainRPx;x<=mainRPx;x+=stepPx){if(x*x+y*y>mainRPx*mainRPx)continue;total++;const gx=center.x+x,gy=center.y+y;let occupied=false;for(const c of clouds){for(const p of c.particles){const dx=gx-p.x,dy=gy-p.y;if(dx*dx+dy*dy<hitR*hitR){occupied=true;break;}}if(occupied)break;}if(occupied)hit++;}}const pct=total?hit/total*100:0;coverageEl.textContent=pct.toFixed(2)+'%';}
+      <section class="metrics">
+        <div class="metric"><div class="k">נפח חלקיק יחיד (45μm) בליטר</div><div class="v" id="particle-volume">—</div></div>
+        <div class="metric"><div class="k">סה"כ חלקיקים (70% מהמטען)</div><div class="v" id="total">840</div></div>
+        <div class="metric"><div class="k">חלקיקים לכל פצצונת</div><div class="v" id="perSub">10.50</div></div>
+        <div class="metric"><div class="k">כיסוי שטח משוער (%)</div><div class="v" id="coverage">7.20%</div></div>
+      </section>
 
-function update(dt){const simDt=dt*TIME_SCALE;simTime+=simDt;const phase=simTime<INITIAL_PHASE_SIM_SEC?'פיזור ראשוני':'דיפוזיה';clockEl.textContent=`זמן: ${simTime.toFixed(1)}ש׳ | שלב: ${phase}`;
-for(const c of clouds){if(simTime<INITIAL_PHASE_SIM_SEC){c.x+=c.vx*simDt;c.y+=c.vy*simDt;const toT=Math.hypot(c.targetX-c.x,c.targetY-c.y);if(toT<6){c.vx*=0.2;c.vy*=0.2;}for(const p of c.particles){p.x+=p.vx*simDt;p.y+=p.vy*simDt;}}
-else{c.vx*=0.92;c.vy*=0.92;for(const p of c.particles){p.vx+=(Math.random()-.5)*0.08*simDt;p.vy+=(Math.random()-.5)*0.08*simDt;const sp=Math.hypot(p.vx,p.vy),max=DIFFUSION_MAX_MPS*pxPerM;if(sp>max){const k=max/sp;p.vx*=k;p.vy*=k;}p.x+=p.vx*simDt;p.y+=p.vy*simDt;}}}
-if(simTime>=INITIAL_PHASE_SIM_SEC&&statusEl.textContent.indexOf('דיפוזיה')===-1){statusEl.textContent='שלב הדיפוזיה: החלקיקים מתפזרים חופשי עד 1 מ׳/ש׳, והכיסוי מתעדכן בזמן אמת.';}
-estimateCoverage();}
+      <section class="legend">
+        מפת צבעים לריכוז: כחול = ריכוז נמוך, אדום = ריכוז גבוה.
+        <div class="bar"></div>
+      </section>
+    </aside>
+  </main>
 
-function draw(){const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);ctx.strokeStyle='rgba(255,255,255,.05)';for(let x=0;x<w;x+=52){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}for(let y=0;y<h;y+=52){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
-ctx.beginPath();ctx.arc(center.x,center.y,mainRPx,0,Math.PI*2);ctx.strokeStyle='rgba(120,190,255,.45)';ctx.lineWidth=1.8;ctx.stroke();
-if(!clouds.length)return;const maxD=Math.max(...clouds.map(c=>c.density));ctx.save();ctx.globalCompositeOperation='lighter';for(const c of clouds){const n=c.density/maxD;for(const p of c.particles){const g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,3.6);g.addColorStop(0,colorByDensity(n));g.addColorStop(1,'rgba(255,80,40,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(p.x,p.y,3.6,0,Math.PI*2);ctx.fill();}}ctx.restore();}
+  <script>
+    const canvas = document.getElementById('c');
+    const ctx = canvas.getContext('2d');
 
-function reset(){clouds=[];simTime=0;running=false;statusEl.textContent='מוכן להרצה.';clockEl.textContent='זמן: 0.0ש׳ | שלב: המתנה';coverageEl.textContent='0.00%';metrics();}
-let last=performance.now();function loop(t){const dt=Math.min(.04,(t-last)/1000);last=t;draw();if(running)update(dt);requestAnimationFrame(loop);}payload.addEventListener('input',metrics);subs.addEventListener('input',metrics);document.getElementById('simBtn').addEventListener('click',buildSimulation);document.getElementById('resetBtn').addEventListener('click',reset);window.addEventListener('resize',resize);resize();metrics();requestAnimationFrame(loop);
-</script>
+    const payload = document.getElementById('payload');
+    const subs = document.getElementById('subs');
+    const payloadVal = document.getElementById('payloadVal');
+    const particleVolumeEl = document.getElementById('particle-volume');
+    const subsVal = document.getElementById('subsVal');
+    const totalEl = document.getElementById('total');
+    const perSubEl = document.getElementById('perSub');
+    const coverageEl = document.getElementById('coverage');
+    const statusEl = document.getElementById('status');
+    const clockEl = document.getElementById('clock');
+
+    const MAIN_R_M = 1000;
+    const SUB_R_M = 30;
+    const TIME_SCALE = 10; // 100ms real = 1 second simulated
+    const PARTICLE_DIAMETER_M = 45e-6;
+    const PARTICLE_RADIUS_M = PARTICLE_DIAMETER_M / 2;
+    const PARTICLE_VOLUME_L = (4 / 3) * Math.PI * Math.pow(PARTICLE_RADIUS_M, 3) * 1000;
+
+    let center = { x: 0, y: 0 };
+    let mainRPx = 1;
+    let subRPx = 1;
+    let pxPerM = 1;
+
+    let simTime = 0;
+    let running = false;
+    let clouds = []; // [{x,y,particles:[{ox,oy,x,y,vx,vy}]}]
+
+    function resize() {
+      const rect = canvas.parentElement.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      center.x = rect.width / 2;
+      center.y = rect.height / 2;
+      mainRPx = Math.min(rect.width, rect.height) * 0.43;
+      pxPerM = mainRPx / MAIN_R_M;
+      subRPx = SUB_R_M * pxPerM;
+    }
+
+    function randomPointInCircle(r) {
+      const t = Math.random() * Math.PI * 2;
+      const u = Math.random() + Math.random();
+      const rr = (u > 1 ? 2 - u : u) * r;
+      return { x: center.x + Math.cos(t) * rr, y: center.y + Math.sin(t) * rr };
+    }
+
+    function metrics() {
+      const p = Number(payload.value);
+      const n = Number(subs.value);
+      const total = (p * 0.7) / PARTICLE_VOLUME_L;
+      const perSub = total / n;
+      particleVolumeEl.textContent = PARTICLE_VOLUME_L.toExponential(3);
+      const coverage = Math.min(100, (n * Math.PI * SUB_R_M * SUB_R_M) / (Math.PI * MAIN_R_M * MAIN_R_M) * 100);
+
+      payloadVal.textContent = p.toLocaleString();
+      subsVal.textContent = n.toLocaleString();
+      totalEl.textContent = total.toFixed(0);
+      perSubEl.textContent = perSub.toFixed(2);
+      coverageEl.textContent = coverage.toFixed(2) + '%';
+      return { n, total, perSub, coverage };
+    }
+
+    function colorByDensity(norm) {
+      const t = Math.max(0, Math.min(1, norm));
+      const hue = 230 - 220 * t; // כחול->אדום
+      const sat = 95;
+      const light = 60 - 10 * t;
+      return `hsla(${hue}, ${sat}%, ${light}%, ${0.18 + 0.55 * t})`;
+    }
+
+    function buildSimulation() {
+      const { n, perSub, coverage } = metrics();
+      clouds = [];
+      simTime = 0;
+
+      const particlesPerCloud = Math.max(6, Math.min(120, Math.round(perSub * 0.9)));
+      const diffBase = 5 + Math.min(35, perSub * 0.4);
+
+      for (let i = 0; i < n; i++) {
+        const c = randomPointInCircle(mainRPx);
+        const particles = [];
+        for (let j = 0; j < particlesPerCloud; j++) {
+          const a = Math.random() * Math.PI * 2;
+          const rr = Math.random() * subRPx;
+          particles.push({
+            ox: c.x,
+            oy: c.y,
+            x: c.x + Math.cos(a) * rr,
+            y: c.y + Math.sin(a) * rr,
+            vx: (Math.random() - 0.5) * Math.min(diffBase, pxPerM),
+            vy: (Math.random() - 0.5) * Math.min(diffBase, pxPerM)
+          });
+        }
+        clouds.push({ x: c.x, y: c.y, particles, density: perSub });
+      }
+
+      running = true;
+      statusEl.textContent = `פיזור מיידי הושלם (עד 30 מ׳), ומתחילה דיפוזיה חופשית בקצב עד 1 מ' לשנייה.`;
+    }
+
+    function resetSim() {
+      clouds = [];
+      simTime = 0;
+      running = false;
+      statusEl.textContent = 'מוכן להרצה.';
+      clockEl.textContent = 'זמן סימולציה: 0.0 שניות';
+      metrics();
+    }
+
+    function drawBase() {
+      const w = canvas.clientWidth;
+      const h = canvas.clientHeight;
+      ctx.clearRect(0, 0, w, h);
+
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      for (let x = 0; x < w; x += 52) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+      for (let y = 0; y < h; y += 52) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+      ctx.beginPath();
+      ctx.arc(center.x, center.y, mainRPx, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(120,190,255,.45)';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+    }
+
+    function updateDiffusion(dt) {
+      const simDt = dt * TIME_SCALE;
+      simTime += simDt;
+      clockEl.textContent = `זמן סימולציה: ${simTime.toFixed(1)} שניות`;
+
+      for (const c of clouds) {
+        for (const p of c.particles) {
+          // Brownian-like motion with mild damping
+          p.vx += (Math.random() - 0.5) * 0.08 * simDt;
+          p.vy += (Math.random() - 0.5) * 0.08 * simDt;
+          p.vx *= 0.995;
+          p.vy *= 0.995;
+
+          p.x += p.vx * simDt;
+          p.y += p.vy * simDt;
+
+          // diffusion after initial spread: max drift speed is 1 meter/second in free space
+          const maxSpeedPx = pxPerM * 1;
+          const speed = Math.hypot(p.vx, p.vy);
+          if (speed > maxSpeedPx) {
+            const k = maxSpeedPx / speed;
+            p.vx *= k;
+            p.vy *= k;
+          }
+        }
+      }
+    }
+
+    function drawDensity() {
+      if (!clouds.length) return;
+      const maxD = Math.max(...clouds.map(c => c.density));
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (const c of clouds) {
+        const norm = c.density / maxD;
+        for (const p of c.particles) {
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 3.6);
+          const col = colorByDensity(norm);
+          g.addColorStop(0, col);
+          g.addColorStop(1, 'rgba(255,80,40,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+      ctx.restore();
+    }
+
+    let last = performance.now();
+    function frame(t) {
+      const dt = Math.min(0.04, (t - last) / 1000);
+      last = t;
+
+      drawBase();
+      if (running) updateDiffusion(dt);
+      drawDensity();
+
+      requestAnimationFrame(frame);
+    }
+
+    payload.addEventListener('input', metrics);
+    subs.addEventListener('input', metrics);
+    document.getElementById('simBtn').addEventListener('click', buildSimulation);
+    document.getElementById('resetBtn').addEventListener('click', resetSim);
+    window.addEventListener('resize', resize);
+
+    resize();
+    metrics();
+    requestAnimationFrame(frame);
+  </script>
 </body>
 </html>
