@@ -1,356 +1,76 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>סימולציית מצרר - דיפוזיה וריכוז</title>
-  <style>
-    :root {
-      --bg: #0f1117;
-      --panel: #181c26;
-      --panel2: #202636;
-      --text: #e8eaf0;
-      --muted: #9ea8c2;
-      --border: rgba(255,255,255,0.14);
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font-family: "Segoe UI", Arial, sans-serif;
-      min-height: 100vh;
-      display: grid;
-      grid-template-rows: auto 1fr;
-    }
-    header {
-      padding: 14px 18px;
-      border-bottom: 1px solid var(--border);
-      background: rgba(24,28,38,.9);
-    }
-    h1 { margin: 0; font-size: 1.05rem; }
-    .sub { margin-top: 6px; font-size: .88rem; color: var(--muted); }
-
-    .layout {
-      display: grid;
-      grid-template-columns: 1fr 345px;
-      gap: 12px;
-      padding: 12px;
-      min-height: 0;
-    }
-    .canvas-wrap, .controls {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-    }
-    .canvas-wrap { position: relative; overflow: hidden; min-height: 470px; }
-    canvas {
-      width: 100%;
-      height: 100%;
-      display: block;
-      background: radial-gradient(circle at center, #161f2d 0%, #0b111a 56%, #070a10 100%);
-    }
-    .hud {
-      position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
-      display: flex;
-      gap: 8px;
-      justify-content: space-between;
-      pointer-events: none;
-    }
-    .chip {
-      background: rgba(8,11,17,.78);
-      border: 1px solid rgba(255,255,255,.2);
-      border-radius: 10px;
-      padding: 7px 10px;
-      font-size: .82rem;
-      max-width: 56%;
-      line-height: 1.35;
-    }
-
-    .controls { padding: 14px; display: grid; gap: 12px; align-content: start; }
-    .field label { display: flex; justify-content: space-between; color: var(--muted); font-size: .86rem; margin-bottom: 4px; }
-    input[type=range] { width: 100%; }
-    .btn {
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 11px;
-      background: var(--panel2);
-      color: var(--text);
-      cursor: pointer;
-      font-weight: 600;
-    }
-    .btn:hover { border-color: rgba(255,255,255,.28); }
-
-    .metrics { border-top: 1px dashed rgba(255,255,255,.2); padding-top: 10px; display: grid; gap: 8px; }
-    .metric { background: #141a27; border: 1px solid rgba(255,255,255,.09); border-radius: 10px; padding: 8px; }
-    .k { color: var(--muted); font-size: .75rem; }
-    .v { margin-top: 2px; font-size: 1rem; font-weight: 700; }
-    .legend {
-      border-top: 1px dashed rgba(255,255,255,.2);
-      padding-top: 10px;
-      color: var(--muted);
-      font-size: .8rem;
-      line-height: 1.45;
-    }
-    .bar {
-      height: 10px;
-      border-radius: 999px;
-      margin-top: 6px;
-      background: linear-gradient(90deg, #2a4cff 0%, #00cfff 40%, #8eff7a 65%, #ffd84d 82%, #ff5a38 100%);
-    }
-
-    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .canvas-wrap{min-height:360px;} }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>פיזור מצרר - חישוב מקדים והדמיית צבעים</title>
+<style>
+:root{--bg:#0f1117;--panel:#181c26;--text:#e8eaf0;--muted:#9ea8c2;--border:rgba(255,255,255,.14)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Segoe UI,Arial,sans-serif;min-height:100vh;display:grid;grid-template-rows:auto 1fr}
+header{padding:12px 16px;border-bottom:1px solid var(--border)}.sub{color:var(--muted);font-size:.86rem;margin-top:4px}
+.layout{display:grid;grid-template-columns:1fr 360px;gap:12px;padding:12px}.canvasWrap,.panel{background:var(--panel);border:1px solid var(--border);border-radius:12px}
+.canvasWrap{position:relative;min-height:480px;overflow:hidden}canvas{width:100%;height:100%;display:block;background:#0b111a}
+.hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;gap:8px;pointer-events:none}.chip{background:rgba(6,10,16,.76);border:1px solid rgba(255,255,255,.2);padding:6px 9px;border-radius:9px;font-size:.8rem}
+.panel{padding:12px;display:grid;gap:10px;align-content:start}.row label{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted);margin-bottom:4px}input[type=range]{width:100%}
+.btn{padding:10px;border-radius:10px;border:1px solid var(--border);background:#212838;color:var(--text);font-weight:600;cursor:pointer}
+.metrics{border-top:1px dashed rgba(255,255,255,.2);padding-top:8px;display:grid;gap:6px}.m{background:#131826;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:6px}.k{color:var(--muted);font-size:.74rem}.v{font-size:.95rem;font-weight:700}
+.legend{border-top:1px dashed rgba(255,255,255,.2);padding-top:8px}.bar{height:12px;border-radius:999px;background:linear-gradient(90deg,#2a4cff,#00cfff,#8eff7a,#ffd84d,#ff5a38)}.ticks{display:flex;justify-content:space-between;font-size:.65rem;color:var(--muted);margin-top:4px}
+@media (max-width:980px){.layout{grid-template-columns:1fr}.canvasWrap{min-height:360px}}
+</style>
 </head>
 <body>
-  <header>
-    <h1>פיזור מצרר ודיפוזיה בזמן</h1>
-    <div class="sub">שלב 1: פיזור מיידי מהמצרר עד 30 מ׳. שלב 2: דיפוזיה חופשית במרחב במהירות עד 1 מטר/שנייה.</div>
-  </header>
+<header><h3 style="margin:0">פיזור מצרר - חישוב מקדים</h3><div class="sub">קצב הצגה: 1 שנייה סימולטיבית לכל 100ms אמיתיים. מחשבים איטרציות מראש, ובהרצה מעדכנים צבעים בלבד.</div></header>
+<main class="layout">
+<section class="canvasWrap"><canvas id="c"></canvas><div class="hud"><div class="chip" id="status">מוכן</div><div class="chip" id="clock">t=0.0s</div></div></section>
+<aside class="panel">
+  <div class="row"><label><span>נפח מטען (ליטר)</span><b id="payloadVal">60</b></label><input id="payload" type="range" min="30" max="100" value="60" step="1"></div>
+  <div class="row"><label><span>פצצונות</span><b id="subsVal">80</b></label><input id="subs" type="range" min="10" max="300" value="80" step="1"></div>
+  <button class="btn" id="simBtn">Simulate</button><button class="btn" id="resetBtn">Reset</button>
+  <section class="metrics">
+    <div class="m"><div class="k">נפח חלקיק 45μm (ליטר)</div><div class="v" id="particleV"></div></div>
+    <div class="m"><div class="k">סה"כ חלקיקים</div><div class="v" id="totalP"></div></div>
+    <div class="m"><div class="k">כיסוי (>=1000 חלקיקים/מ"ר)</div><div class="v" id="coverage">0.00%</div></div>
+  </section>
+  <section class="legend"><div style="font-size:.78rem;color:var(--muted)">סרגל ריכוז (log10 חלקיקים/מ"ר)</div><div class="bar"></div><div class="ticks"><span>10³</span><span>10⁵</span><span>10⁷</span><span>10⁹</span><span>10¹⁰</span></div></section>
+</aside>
+</main>
+<script>
+const canvas=document.getElementById('c'),ctx=canvas.getContext('2d');
+const payload=document.getElementById('payload'),subs=document.getElementById('subs');
+const payloadVal=document.getElementById('payloadVal'),subsVal=document.getElementById('subsVal');
+const particleVEl=document.getElementById('particleV'),totalPEl=document.getElementById('totalP'),coverageEl=document.getElementById('coverage');
+const statusEl=document.getElementById('status'),clockEl=document.getElementById('clock');
+const MAIN_R_M=1000,TIME_SCALE=10,INITIAL_SPEED=40,DIFF_SPEED=1,SIM_SECONDS=30,DT=0.2,GRID_M=20;
+const D=45e-6,R=D/2,PARTICLE_L=(4/3*Math.PI*R*R*R)*1000;
+let center={x:0,y:0},mainRPx=1,pxPerM=1; let frames=[],frameIdx=0,playing=false,simT=0,last=performance.now();
 
-  <main class="layout">
-    <section class="canvas-wrap">
-      <canvas id="c"></canvas>
-      <div class="hud">
-        <div class="chip" id="status">מוכן להרצה.</div>
-        <div class="chip" id="clock">זמן סימולציה: 0.0 שניות</div>
-      </div>
-    </section>
+function resize(){const r=canvas.parentElement.getBoundingClientRect(),dpr=devicePixelRatio||1;canvas.width=r.width*dpr;canvas.height=r.height*dpr;canvas.style.width=r.width+'px';canvas.style.height=r.height+'px';ctx.setTransform(dpr,0,0,dpr,0,0);center.x=r.width/2;center.y=r.height/2;mainRPx=Math.min(r.width,r.height)*.43;pxPerM=mainRPx/MAIN_R_M;}
+function randCircle(r){const a=Math.random()*Math.PI*2,u=Math.random()+Math.random(),rr=(u>1?2-u:u)*r;return{x:Math.cos(a)*rr,y:Math.sin(a)*rr};}
+function metrics(){const p=+payload.value,n=+subs.value,total=(p*0.7)/PARTICLE_L;payloadVal.textContent=p;subsVal.textContent=n;particleVEl.textContent=PARTICLE_L.toExponential(3);totalPEl.textContent=total.toExponential(3);return{n,total};}
 
-    <aside class="controls">
-      <div class="field">
-        <label><span>נפח מטען (ליטר)</span><strong id="payloadVal">60</strong></label>
-        <input id="payload" type="range" min="30" max="100" step="1" value="60" />
-      </div>
-      <div class="field">
-        <label><span>מספר פצצונות</span><strong id="subsVal">80</strong></label>
-        <input id="subs" type="range" min="10" max="300" step="1" value="80" />
-      </div>
+function densityToColor(v){ // v particles/m^2
+  const l=Math.log10(Math.max(1,v));
+  const t=Math.max(0,Math.min(1,(l-3)/7));
+  const h=230-220*t; return `hsl(${h},95%,${58-10*t}%)`;
+}
 
-      <button class="btn" id="simBtn">Simulate</button>
-      <button class="btn" id="resetBtn">Reset</button>
+function precompute(){const {n,total}=metrics();statusEl.textContent='מחשב איטרציות...';frames=[];const steps=Math.floor(SIM_SECONDS/DT);const particlesPerSub=Math.max(12,Math.min(120,Math.round(Math.log10(total/n+1)*20)));const weight=(total/n)/particlesPerSub;const subsArr=[];
+for(let i=0;i<n;i++){const target=randCircle(MAIN_R_M);const a=Math.atan2(target.y,target.x);subsArr.push({x:0,y:0,vx:Math.cos(a)*INITIAL_SPEED,vy:Math.sin(a)*INITIAL_SPEED,target,particles:Array.from({length:particlesPerSub},()=>({x:0,y:0,vx:Math.cos(Math.random()*Math.PI*2)*INITIAL_SPEED,vy:Math.sin(Math.random()*Math.PI*2)*INITIAL_SPEED}))});}
+for(let s=0;s<=steps;s++){const t=s*DT;for(const sub of subsArr){if(t<2){sub.x+=sub.vx*DT;sub.y+=sub.vy*DT;for(const p of sub.particles){p.x+=p.vx*DT;p.y+=p.vy*DT;}}
+else{for(const p of sub.particles){p.vx+=(Math.random()-.5)*0.2*DT;p.vy+=(Math.random()-.5)*0.2*DT;const sp=Math.hypot(p.vx,p.vy);if(sp>DIFF_SPEED){p.vx=p.vx/sp*DIFF_SPEED;p.vy=p.vy/sp*DIFF_SPEED;}p.x+=p.vx*DT;p.y+=p.vy*DT;}}}
+frames.push(buildGrid(subsArr,weight));}
+frameIdx=0;simT=0;playing=true;statusEl.textContent='הרצה: מעדכן צבעים לפי איטרציות מחושבות.';}
 
-      <section class="metrics">
-        <div class="metric"><div class="k">נפח חלקיק יחיד (45μm) בליטר</div><div class="v" id="particle-volume">—</div></div>
-        <div class="metric"><div class="k">סה"כ חלקיקים (70% מהמטען)</div><div class="v" id="total">840</div></div>
-        <div class="metric"><div class="k">חלקיקים לכל פצצונת</div><div class="v" id="perSub">10.50</div></div>
-        <div class="metric"><div class="k">כיסוי שטח משוער (%)</div><div class="v" id="coverage">7.20%</div></div>
-      </section>
+function buildGrid(subsArr,weight){const cells=[];let covered=0,total=0;for(let y=-MAIN_R_M;y<=MAIN_R_M;y+=GRID_M){for(let x=-MAIN_R_M;x<=MAIN_R_M;x+=GRID_M){if(x*x+y*y>MAIN_R_M*MAIN_R_M)continue;total++;let v=0;for(const sub of subsArr){for(const p of sub.particles){const dx=x-p.x,dy=y-p.y,d2=dx*dx+dy*dy;const sigma=12;v+=weight*Math.exp(-d2/(2*sigma*sigma));}}const den=v/(GRID_M*GRID_M);if(den>=1000)covered++;cells.push({x,y,den});}}
+return {cells,coverage: total?covered/total*100:0};}
 
-      <section class="legend">
-        מפת צבעים לריכוז: כחול = ריכוז נמוך, אדום = ריכוז גבוה.
-        <div class="bar"></div>
-      </section>
-    </aside>
-  </main>
+function draw(){ctx.clearRect(0,0,canvas.clientWidth,canvas.clientHeight);ctx.beginPath();ctx.arc(center.x,center.y,mainRPx,0,Math.PI*2);ctx.strokeStyle='rgba(120,190,255,.45)';ctx.lineWidth=1.7;ctx.stroke();if(!frames.length)return;
+const f=frames[Math.min(frameIdx,frames.length-1)];const s=GRID_M*pxPerM*.9;for(const c of f.cells){ctx.fillStyle=densityToColor(c.den);ctx.fillRect(center.x+c.x*pxPerM-s/2,center.y+c.y*pxPerM-s/2,s,s);}coverageEl.textContent=f.coverage.toFixed(2)+'%';}
 
-  <script>
-    const canvas = document.getElementById('c');
-    const ctx = canvas.getContext('2d');
-
-    const payload = document.getElementById('payload');
-    const subs = document.getElementById('subs');
-    const payloadVal = document.getElementById('payloadVal');
-    const particleVolumeEl = document.getElementById('particle-volume');
-    const subsVal = document.getElementById('subsVal');
-    const totalEl = document.getElementById('total');
-    const perSubEl = document.getElementById('perSub');
-    const coverageEl = document.getElementById('coverage');
-    const statusEl = document.getElementById('status');
-    const clockEl = document.getElementById('clock');
-
-    const MAIN_R_M = 1000;
-    const SUB_R_M = 30;
-    const TIME_SCALE = 10; // 100ms real = 1 second simulated
-    const PARTICLE_DIAMETER_M = 45e-6;
-    const PARTICLE_RADIUS_M = PARTICLE_DIAMETER_M / 2;
-    const PARTICLE_VOLUME_L = (4 / 3) * Math.PI * Math.pow(PARTICLE_RADIUS_M, 3) * 1000;
-
-    let center = { x: 0, y: 0 };
-    let mainRPx = 1;
-    let subRPx = 1;
-    let pxPerM = 1;
-
-    let simTime = 0;
-    let running = false;
-    let clouds = []; // [{x,y,particles:[{ox,oy,x,y,vx,vy}]}]
-
-    function resize() {
-      const rect = canvas.parentElement.getBoundingClientRect();
-      const dpr = window.devicePixelRatio || 1;
-      canvas.width = Math.floor(rect.width * dpr);
-      canvas.height = Math.floor(rect.height * dpr);
-      canvas.style.width = rect.width + 'px';
-      canvas.style.height = rect.height + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-
-      center.x = rect.width / 2;
-      center.y = rect.height / 2;
-      mainRPx = Math.min(rect.width, rect.height) * 0.43;
-      pxPerM = mainRPx / MAIN_R_M;
-      subRPx = SUB_R_M * pxPerM;
-    }
-
-    function randomPointInCircle(r) {
-      const t = Math.random() * Math.PI * 2;
-      const u = Math.random() + Math.random();
-      const rr = (u > 1 ? 2 - u : u) * r;
-      return { x: center.x + Math.cos(t) * rr, y: center.y + Math.sin(t) * rr };
-    }
-
-    function metrics() {
-      const p = Number(payload.value);
-      const n = Number(subs.value);
-      const total = (p * 0.7) / PARTICLE_VOLUME_L;
-      const perSub = total / n;
-      particleVolumeEl.textContent = PARTICLE_VOLUME_L.toExponential(3);
-      const coverage = Math.min(100, (n * Math.PI * SUB_R_M * SUB_R_M) / (Math.PI * MAIN_R_M * MAIN_R_M) * 100);
-
-      payloadVal.textContent = p.toLocaleString();
-      subsVal.textContent = n.toLocaleString();
-      totalEl.textContent = total.toFixed(0);
-      perSubEl.textContent = perSub.toFixed(2);
-      coverageEl.textContent = coverage.toFixed(2) + '%';
-      return { n, total, perSub, coverage };
-    }
-
-    function colorByDensity(norm) {
-      const t = Math.max(0, Math.min(1, norm));
-      const hue = 230 - 220 * t; // כחול->אדום
-      const sat = 95;
-      const light = 60 - 10 * t;
-      return `hsla(${hue}, ${sat}%, ${light}%, ${0.18 + 0.55 * t})`;
-    }
-
-    function buildSimulation() {
-      const { n, perSub, coverage } = metrics();
-      clouds = [];
-      simTime = 0;
-
-      const particlesPerCloud = Math.max(6, Math.min(120, Math.round(perSub * 0.9)));
-      const diffBase = 5 + Math.min(35, perSub * 0.4);
-
-      for (let i = 0; i < n; i++) {
-        const c = randomPointInCircle(mainRPx);
-        const particles = [];
-        for (let j = 0; j < particlesPerCloud; j++) {
-          const a = Math.random() * Math.PI * 2;
-          const rr = Math.random() * subRPx;
-          particles.push({
-            ox: c.x,
-            oy: c.y,
-            x: c.x + Math.cos(a) * rr,
-            y: c.y + Math.sin(a) * rr,
-            vx: (Math.random() - 0.5) * Math.min(diffBase, pxPerM),
-            vy: (Math.random() - 0.5) * Math.min(diffBase, pxPerM)
-          });
-        }
-        clouds.push({ x: c.x, y: c.y, particles, density: perSub });
-      }
-
-      running = true;
-      statusEl.textContent = `פיזור מיידי הושלם (עד 30 מ׳), ומתחילה דיפוזיה חופשית בקצב עד 1 מ' לשנייה.`;
-    }
-
-    function resetSim() {
-      clouds = [];
-      simTime = 0;
-      running = false;
-      statusEl.textContent = 'מוכן להרצה.';
-      clockEl.textContent = 'זמן סימולציה: 0.0 שניות';
-      metrics();
-    }
-
-    function drawBase() {
-      const w = canvas.clientWidth;
-      const h = canvas.clientHeight;
-      ctx.clearRect(0, 0, w, h);
-
-      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-      for (let x = 0; x < w; x += 52) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
-      for (let y = 0; y < h; y += 52) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
-
-      ctx.beginPath();
-      ctx.arc(center.x, center.y, mainRPx, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(120,190,255,.45)';
-      ctx.lineWidth = 1.8;
-      ctx.stroke();
-    }
-
-    function updateDiffusion(dt) {
-      const simDt = dt * TIME_SCALE;
-      simTime += simDt;
-      clockEl.textContent = `זמן סימולציה: ${simTime.toFixed(1)} שניות`;
-
-      for (const c of clouds) {
-        for (const p of c.particles) {
-          // Brownian-like motion with mild damping
-          p.vx += (Math.random() - 0.5) * 0.08 * simDt;
-          p.vy += (Math.random() - 0.5) * 0.08 * simDt;
-          p.vx *= 0.995;
-          p.vy *= 0.995;
-
-          p.x += p.vx * simDt;
-          p.y += p.vy * simDt;
-
-          // diffusion after initial spread: max drift speed is 1 meter/second in free space
-          const maxSpeedPx = pxPerM * 1;
-          const speed = Math.hypot(p.vx, p.vy);
-          if (speed > maxSpeedPx) {
-            const k = maxSpeedPx / speed;
-            p.vx *= k;
-            p.vy *= k;
-          }
-        }
-      }
-    }
-
-    function drawDensity() {
-      if (!clouds.length) return;
-      const maxD = Math.max(...clouds.map(c => c.density));
-
-      ctx.save();
-      ctx.globalCompositeOperation = 'lighter';
-      for (const c of clouds) {
-        const norm = c.density / maxD;
-        for (const p of c.particles) {
-          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 3.6);
-          const col = colorByDensity(norm);
-          g.addColorStop(0, col);
-          g.addColorStop(1, 'rgba(255,80,40,0)');
-          ctx.fillStyle = g;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 3.6, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-      ctx.restore();
-    }
-
-    let last = performance.now();
-    function frame(t) {
-      const dt = Math.min(0.04, (t - last) / 1000);
-      last = t;
-
-      drawBase();
-      if (running) updateDiffusion(dt);
-      drawDensity();
-
-      requestAnimationFrame(frame);
-    }
-
-    payload.addEventListener('input', metrics);
-    subs.addEventListener('input', metrics);
-    document.getElementById('simBtn').addEventListener('click', buildSimulation);
-    document.getElementById('resetBtn').addEventListener('click', resetSim);
-    window.addEventListener('resize', resize);
-
-    resize();
-    metrics();
-    requestAnimationFrame(frame);
-  </script>
+function tick(t){const dt=Math.min(.05,(t-last)/1000);last=t;if(playing&&frames.length){simT+=dt*TIME_SCALE;frameIdx=Math.floor(simT/DT);if(frameIdx>=frames.length){frameIdx=frames.length-1;playing=false;statusEl.textContent='סיום הרצה.';}clockEl.textContent='t='+simT.toFixed(1)+'s';}draw();requestAnimationFrame(tick);}
+function reset(){frames=[];frameIdx=0;simT=0;playing=false;clockEl.textContent='t=0.0s';statusEl.textContent='מוכן';coverageEl.textContent='0.00%';metrics();draw();}
+payload.addEventListener('input',metrics);subs.addEventListener('input',metrics);document.getElementById('simBtn').addEventListener('click',precompute);document.getElementById('resetBtn').addEventListener('click',reset);window.addEventListener('resize',()=>{resize();draw();});
+resize();metrics();requestAnimationFrame(tick);
+</script>
 </body>
 </html>
