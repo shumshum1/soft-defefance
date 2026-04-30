@@ -1,26 +1,24 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="he" dir="rtl">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cluster Dispersion Scale Simulator</title>
+  <title>סימולציית מצרר - דיפוזיה וריכוז</title>
   <style>
     :root {
       --bg: #0f1117;
       --panel: #181c26;
-      --panel-2: #202636;
+      --panel2: #202636;
       --text: #e8eaf0;
       --muted: #9ea8c2;
-      --accent: #78beff;
-      --border: rgba(255, 255, 255, 0.14);
-      --warn: #ffb467;
+      --border: rgba(255,255,255,0.14);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, Segoe UI, Roboto, sans-serif;
+      font-family: "Segoe UI", Arial, sans-serif;
       min-height: 100vh;
       display: grid;
       grid-template-rows: auto 1fr;
@@ -28,29 +26,29 @@
     header {
       padding: 14px 18px;
       border-bottom: 1px solid var(--border);
-      background: rgba(24, 28, 38, 0.9);
+      background: rgba(24,28,38,.9);
     }
     h1 { margin: 0; font-size: 1.05rem; }
-    .sub { margin-top: 5px; color: var(--muted); font-size: 0.88rem; }
+    .sub { margin-top: 6px; font-size: .88rem; color: var(--muted); }
 
     .layout {
       display: grid;
-      grid-template-columns: 1fr 340px;
+      grid-template-columns: 1fr 345px;
       gap: 12px;
       padding: 12px;
       min-height: 0;
     }
-    .canvas-panel, .control-panel {
+    .canvas-wrap, .controls {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 14px;
     }
-    .canvas-panel { position: relative; overflow: hidden; min-height: 460px; }
+    .canvas-wrap { position: relative; overflow: hidden; min-height: 470px; }
     canvas {
       width: 100%;
       height: 100%;
       display: block;
-      background: radial-gradient(circle at center, #151b29 0%, #0b111a 55%, #070a11 100%);
+      background: radial-gradient(circle at center, #161f2d 0%, #0b111a 56%, #070a10 100%);
     }
     .hud {
       position: absolute;
@@ -58,139 +56,124 @@
       left: 10px;
       right: 10px;
       display: flex;
-      justify-content: space-between;
       gap: 8px;
+      justify-content: space-between;
       pointer-events: none;
     }
     .chip {
-      background: rgba(7, 10, 16, 0.75);
-      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(8,11,17,.78);
+      border: 1px solid rgba(255,255,255,.2);
       border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 0.82rem;
+      padding: 7px 10px;
+      font-size: .82rem;
+      max-width: 56%;
       line-height: 1.35;
-      max-width: 55%;
     }
 
-    .control-panel {
-      padding: 14px;
-      display: grid;
-      align-content: start;
-      gap: 12px;
-    }
-    .row label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.86rem;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
-    input[type="range"] { width: 100%; }
+    .controls { padding: 14px; display: grid; gap: 12px; align-content: start; }
+    .field label { display: flex; justify-content: space-between; color: var(--muted); font-size: .86rem; margin-bottom: 4px; }
+    input[type=range] { width: 100%; }
     .btn {
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 12px;
-      font-size: 0.96rem;
-      font-weight: 600;
-      cursor: pointer;
+      padding: 11px;
+      background: var(--panel2);
       color: var(--text);
-      background: var(--panel-2);
+      cursor: pointer;
+      font-weight: 600;
     }
-    .btn:hover { border-color: rgba(255,255,255,0.28); }
-    .metrics {
-      border-top: 1px dashed rgba(255,255,255,0.2);
-      padding-top: 10px;
-      display: grid;
-      gap: 8px;
-    }
-    .metric {
-      background: #131825;
-      border: 1px solid rgba(255,255,255,0.09);
-      border-radius: 10px;
-      padding: 8px;
-    }
-    .metric .k { font-size: 0.75rem; color: var(--muted); }
-    .metric .v { font-size: 1rem; font-weight: 600; margin-top: 3px; }
-    .note { color: var(--warn); font-size: 0.82rem; }
+    .btn:hover { border-color: rgba(255,255,255,.28); }
 
-    @media (max-width: 960px) {
-      .layout { grid-template-columns: 1fr; }
-      .canvas-panel { min-height: 360px; }
+    .metrics { border-top: 1px dashed rgba(255,255,255,.2); padding-top: 10px; display: grid; gap: 8px; }
+    .metric { background: #141a27; border: 1px solid rgba(255,255,255,.09); border-radius: 10px; padding: 8px; }
+    .k { color: var(--muted); font-size: .75rem; }
+    .v { margin-top: 2px; font-size: 1rem; font-weight: 700; }
+    .legend {
+      border-top: 1px dashed rgba(255,255,255,.2);
+      padding-top: 10px;
+      color: var(--muted);
+      font-size: .8rem;
+      line-height: 1.45;
     }
+    .bar {
+      height: 10px;
+      border-radius: 999px;
+      margin-top: 6px;
+      background: linear-gradient(90deg, #2a4cff 0%, #00cfff 40%, #8eff7a 65%, #ffd84d 82%, #ff5a38 100%);
+    }
+
+    @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } .canvas-wrap{min-height:360px;} }
   </style>
 </head>
 <body>
   <header>
-    <h1>Cluster Munition Dispersion — Scale & Concentration</h1>
-    <div class="sub">Main target radius = 1,000m, each submunition cloud radius = 30m (3% of main radius).</div>
+    <h1>פיזור מצרר ודיפוזיה בזמן</h1>
+    <div class="sub">שלב 1: פיזור מיידי מהמצרר עד 30 מ׳. שלב 2: דיפוזיה חופשית במרחב במהירות עד 1 מטר/שנייה.</div>
   </header>
 
   <main class="layout">
-    <section class="canvas-panel">
-      <canvas id="simCanvas"></canvas>
+    <section class="canvas-wrap">
+      <canvas id="c"></canvas>
       <div class="hud">
-        <div class="chip" id="overlayA">Awaiting simulation input.</div>
-        <div class="chip" id="overlayB">Enemy missile path probe: active after simulation starts.</div>
+        <div class="chip" id="status">מוכן להרצה.</div>
+        <div class="chip" id="clock">זמן סימולציה: 0.0 שניות</div>
       </div>
     </section>
 
-    <aside class="control-panel">
-      <div class="row">
-        <label><span>Payload Volume</span><strong id="payloadVal">1000</strong></label>
-        <input id="payload" type="range" min="100" max="5000" value="1000" step="50" />
+    <aside class="controls">
+      <div class="field">
+        <label><span>נפח מטען</span><strong id="payloadVal">1200</strong></label>
+        <input id="payload" type="range" min="100" max="5000" step="50" value="1200" />
+      </div>
+      <div class="field">
+        <label><span>מספר פצצונות</span><strong id="subsVal">80</strong></label>
+        <input id="subs" type="range" min="10" max="300" step="1" value="80" />
       </div>
 
-      <div class="row">
-        <label><span>Number of Submunitions</span><strong id="subVal">60</strong></label>
-        <input id="submunitions" type="range" min="10" max="300" value="60" step="1" />
-      </div>
-
-      <button class="btn" id="simulateBtn">Simulate</button>
+      <button class="btn" id="simBtn">Simulate</button>
       <button class="btn" id="resetBtn">Reset</button>
 
       <section class="metrics">
-        <div class="metric">
-          <div class="k">Total Particle Volume (70% of payload)</div>
-          <div class="v" id="totalParticles">700</div>
-        </div>
-        <div class="metric">
-          <div class="k">Particles per Submunition</div>
-          <div class="v" id="particlesPerSub">11.67</div>
-        </div>
-        <div class="metric">
-          <div class="k">Estimated Area Coverage (%)</div>
-          <div class="v" id="coveragePct">5.40%</div>
-        </div>
-        <div class="note">Even at high submunition counts, 30m local bursts over a 1km radius target leave substantial dark gaps.</div>
+        <div class="metric"><div class="k">סה"כ חלקיקים (70% מהמטען)</div><div class="v" id="total">840</div></div>
+        <div class="metric"><div class="k">חלקיקים לכל פצצונת</div><div class="v" id="perSub">10.50</div></div>
+        <div class="metric"><div class="k">כיסוי שטח משוער (%)</div><div class="v" id="coverage">7.20%</div></div>
+      </section>
+
+      <section class="legend">
+        מפת צבעים לריכוז: כחול = ריכוז נמוך, אדום = ריכוז גבוה.
+        <div class="bar"></div>
       </section>
     </aside>
   </main>
 
   <script>
-    const canvas = document.getElementById('simCanvas');
+    const canvas = document.getElementById('c');
     const ctx = canvas.getContext('2d');
-    const payloadInput = document.getElementById('payload');
-    const subInput = document.getElementById('submunitions');
-    const payloadVal = document.getElementById('payloadVal');
-    const subVal = document.getElementById('subVal');
-    const totalParticlesEl = document.getElementById('totalParticles');
-    const particlesPerSubEl = document.getElementById('particlesPerSub');
-    const coveragePctEl = document.getElementById('coveragePct');
-    const overlayA = document.getElementById('overlayA');
 
-    const MAIN_RADIUS_M = 1000;
-    const SUB_RADIUS_M = 30;
+    const payload = document.getElementById('payload');
+    const subs = document.getElementById('subs');
+    const payloadVal = document.getElementById('payloadVal');
+    const subsVal = document.getElementById('subsVal');
+    const totalEl = document.getElementById('total');
+    const perSubEl = document.getElementById('perSub');
+    const coverageEl = document.getElementById('coverage');
+    const statusEl = document.getElementById('status');
+    const clockEl = document.getElementById('clock');
+
+    const MAIN_R_M = 1000;
+    const SUB_R_M = 30;
+    const TIME_SCALE = 10; // 100ms real = 1 second simulated
 
     let center = { x: 0, y: 0 };
-    let pxPerMeter = 1;
-    let mainRadiusPx = 1;
-    let subRadiusPx = 1;
+    let mainRPx = 1;
+    let subRPx = 1;
+    let pxPerM = 1;
 
-    let submunitions = [];
-    let missile = null;
-    let simRunning = false;
+    let simTime = 0;
+    let running = false;
+    let clouds = []; // [{x,y,particles:[{ox,oy,x,y,vx,vy}]}]
 
-    function resizeCanvas() {
+    function resize() {
       const rect = canvas.parentElement.getBoundingClientRect();
       const dpr = window.devicePixelRatio || 1;
       canvas.width = Math.floor(rect.width * dpr);
@@ -201,164 +184,167 @@
 
       center.x = rect.width / 2;
       center.y = rect.height / 2;
-      mainRadiusPx = Math.min(rect.width, rect.height) * 0.43;
-      pxPerMeter = mainRadiusPx / MAIN_RADIUS_M;
-      subRadiusPx = SUB_RADIUS_M * pxPerMeter;
+      mainRPx = Math.min(rect.width, rect.height) * 0.43;
+      pxPerM = mainRPx / MAIN_R_M;
+      subRPx = SUB_R_M * pxPerM;
     }
 
-    function randomPointInCircle(radiusPx) {
+    function randomPointInCircle(r) {
       const t = Math.random() * Math.PI * 2;
       const u = Math.random() + Math.random();
-      const r = (u > 1 ? 2 - u : u) * radiusPx;
-      return { x: center.x + Math.cos(t) * r, y: center.y + Math.sin(t) * r };
+      const rr = (u > 1 ? 2 - u : u) * r;
+      return { x: center.x + Math.cos(t) * rr, y: center.y + Math.sin(t) * rr };
     }
 
-    function computeMetrics() {
-      const payload = Number(payloadInput.value);
-      const subCount = Number(subInput.value);
-      const totalParticles = payload * 0.7;
-      const particlesPerSub = totalParticles / subCount;
+    function metrics() {
+      const p = Number(payload.value);
+      const n = Number(subs.value);
+      const total = p * 0.7;
+      const perSub = total / n;
+      const coverage = Math.min(100, (n * Math.PI * SUB_R_M * SUB_R_M) / (Math.PI * MAIN_R_M * MAIN_R_M) * 100);
 
-      // Naive geometric upper-bound (no overlap), then capped.
-      const areaMain = Math.PI * MAIN_RADIUS_M * MAIN_RADIUS_M;
-      const areaSubs = subCount * Math.PI * SUB_RADIUS_M * SUB_RADIUS_M;
-      const coveragePct = Math.min(100, (areaSubs / areaMain) * 100);
-
-      payloadVal.textContent = payload.toLocaleString();
-      subVal.textContent = subCount.toLocaleString();
-      totalParticlesEl.textContent = totalParticles.toLocaleString(undefined, { maximumFractionDigits: 0 });
-      particlesPerSubEl.textContent = particlesPerSub.toFixed(2);
-      coveragePctEl.textContent = coveragePct.toFixed(2) + '%';
-
-      return { payload, subCount, totalParticles, particlesPerSub, coveragePct };
+      payloadVal.textContent = p.toLocaleString();
+      subsVal.textContent = n.toLocaleString();
+      totalEl.textContent = total.toFixed(0);
+      perSubEl.textContent = perSub.toFixed(2);
+      coverageEl.textContent = coverage.toFixed(2) + '%';
+      return { n, total, perSub, coverage };
     }
 
-    function simulate() {
-      const { subCount, particlesPerSub, coveragePct } = computeMetrics();
-      submunitions = [];
+    function colorByDensity(norm) {
+      const t = Math.max(0, Math.min(1, norm));
+      const hue = 230 - 220 * t; // כחול->אדום
+      const sat = 95;
+      const light = 60 - 10 * t;
+      return `hsla(${hue}, ${sat}%, ${light}%, ${0.18 + 0.55 * t})`;
+    }
 
-      const densityNorm = Math.min(1, particlesPerSub / 250);
-      const alpha = 0.06 + densityNorm * 0.28;
+    function buildSimulation() {
+      const { n, perSub, coverage } = metrics();
+      clouds = [];
+      simTime = 0;
 
-      for (let i = 0; i < subCount; i++) {
-        const p = randomPointInCircle(mainRadiusPx);
-        submunitions.push({ x: p.x, y: p.y, alpha });
+      const particlesPerCloud = Math.max(6, Math.min(120, Math.round(perSub * 0.9)));
+      const diffBase = 5 + Math.min(35, perSub * 0.4);
+
+      for (let i = 0; i < n; i++) {
+        const c = randomPointInCircle(mainRPx);
+        const particles = [];
+        for (let j = 0; j < particlesPerCloud; j++) {
+          const a = Math.random() * Math.PI * 2;
+          const rr = Math.random() * subRPx;
+          particles.push({
+            ox: c.x,
+            oy: c.y,
+            x: c.x + Math.cos(a) * rr,
+            y: c.y + Math.sin(a) * rr,
+            vx: (Math.random() - 0.5) * Math.min(diffBase, pxPerM),
+            vy: (Math.random() - 0.5) * Math.min(diffBase, pxPerM)
+          });
+        }
+        clouds.push({ x: c.x, y: c.y, particles, density: perSub });
       }
 
-      missile = {
-        x: center.x - mainRadiusPx - 50,
-        y: center.y + (Math.random() * 0.9 - 0.45) * mainRadiusPx,
-        vx: 140,
-        hit: false,
-        trail: []
-      };
-
-      simRunning = true;
-      overlayA.textContent = `Coverage upper-bound: ${coveragePct.toFixed(2)}%. Large gaps remain across target volume.`;
+      running = true;
+      statusEl.textContent = `פיזור מיידי הושלם (עד 30 מ׳), ומתחילה דיפוזיה חופשית בקצב עד 1 מ' לשנייה.`;
     }
 
     function resetSim() {
-      submunitions = [];
-      missile = null;
-      simRunning = false;
-      overlayA.textContent = 'Awaiting simulation input.';
-      computeMetrics();
+      clouds = [];
+      simTime = 0;
+      running = false;
+      statusEl.textContent = 'מוכן להרצה.';
+      clockEl.textContent = 'זמן סימולציה: 0.0 שניות';
+      metrics();
     }
 
-    function drawBackdrop() {
+    function drawBase() {
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
       ctx.clearRect(0, 0, w, h);
 
-      ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      for (let x = 0; x < w; x += 50) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
-      }
-      for (let y = 0; y < h; y += 50) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
-      }
+      ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+      for (let x = 0; x < w; x += 52) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+      for (let y = 0; y < h; y += 52) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
 
       ctx.beginPath();
-      ctx.arc(center.x, center.y, mainRadiusPx, 0, Math.PI * 2);
-      ctx.strokeStyle = 'rgba(120,190,255,0.45)';
+      ctx.arc(center.x, center.y, mainRPx, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(120,190,255,.45)';
       ctx.lineWidth = 1.8;
       ctx.stroke();
     }
 
-    function drawSubmunitionHeatmap() {
+    function updateDiffusion(dt) {
+      const simDt = dt * TIME_SCALE;
+      simTime += simDt;
+      clockEl.textContent = `זמן סימולציה: ${simTime.toFixed(1)} שניות`;
+
+      for (const c of clouds) {
+        for (const p of c.particles) {
+          // Brownian-like motion with mild damping
+          p.vx += (Math.random() - 0.5) * 0.08 * simDt;
+          p.vy += (Math.random() - 0.5) * 0.08 * simDt;
+          p.vx *= 0.995;
+          p.vy *= 0.995;
+
+          p.x += p.vx * simDt;
+          p.y += p.vy * simDt;
+
+          // diffusion after initial spread: max drift speed is 1 meter/second in free space
+          const maxSpeedPx = pxPerM * 1;
+          const speed = Math.hypot(p.vx, p.vy);
+          if (speed > maxSpeedPx) {
+            const k = maxSpeedPx / speed;
+            p.vx *= k;
+            p.vy *= k;
+          }
+        }
+      }
+    }
+
+    function drawDensity() {
+      if (!clouds.length) return;
+      const maxD = Math.max(...clouds.map(c => c.density));
+
       ctx.save();
       ctx.globalCompositeOperation = 'lighter';
-      for (const s of submunitions) {
-        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, subRadiusPx);
-        g.addColorStop(0, `rgba(255,145,90,${s.alpha})`);
-        g.addColorStop(0.45, `rgba(255,120,70,${s.alpha * 0.7})`);
-        g.addColorStop(1, 'rgba(255,70,40,0)');
-        ctx.fillStyle = g;
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, subRadiusPx, 0, Math.PI * 2);
-        ctx.fill();
+      for (const c of clouds) {
+        const norm = c.density / maxD;
+        for (const p of c.particles) {
+          const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 3.6);
+          const col = colorByDensity(norm);
+          g.addColorStop(0, col);
+          g.addColorStop(1, 'rgba(255,80,40,0)');
+          ctx.fillStyle = g;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 3.6, 0, Math.PI * 2);
+          ctx.fill();
+        }
       }
       ctx.restore();
     }
 
-    function updateAndDrawMissile(dt) {
-      if (!missile) return;
-      missile.x += missile.vx * dt;
-      missile.trail.push({ x: missile.x, y: missile.y });
-      if (missile.trail.length > 70) missile.trail.shift();
-
-      missile.hit = false;
-      for (const s of submunitions) {
-        const dx = missile.x - s.x;
-        const dy = missile.y - s.y;
-        if (dx * dx + dy * dy < subRadiusPx * subRadiusPx) {
-          missile.hit = true;
-          break;
-        }
-      }
-
-      ctx.beginPath();
-      for (let i = 0; i < missile.trail.length; i++) {
-        const p = missile.trail[i];
-        i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
-      }
-      ctx.strokeStyle = 'rgba(255,224,106,0.5)';
-      ctx.lineWidth = 1.8;
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.arc(missile.x, missile.y, 5, 0, Math.PI * 2);
-      ctx.fillStyle = missile.hit ? '#ff3f2a' : '#ffe06a';
-      ctx.fill();
-
-      if (!missile.hit && missile.x > center.x + mainRadiusPx + 20) {
-        overlayA.textContent = 'Missile traversed the target zone through dark gaps without intersecting a cloud.';
-        simRunning = false;
-      }
-    }
-
     let last = performance.now();
-    function loop(now) {
-      const dt = Math.min(0.033, (now - last) / 1000);
-      last = now;
+    function frame(t) {
+      const dt = Math.min(0.04, (t - last) / 1000);
+      last = t;
 
-      drawBackdrop();
-      drawSubmunitionHeatmap();
-      if (simRunning) updateAndDrawMissile(dt);
-      else if (missile) updateAndDrawMissile(0);
+      drawBase();
+      if (running) updateDiffusion(dt);
+      drawDensity();
 
-      requestAnimationFrame(loop);
+      requestAnimationFrame(frame);
     }
 
-    payloadInput.addEventListener('input', computeMetrics);
-    subInput.addEventListener('input', computeMetrics);
-    document.getElementById('simulateBtn').addEventListener('click', simulate);
+    payload.addEventListener('input', metrics);
+    subs.addEventListener('input', metrics);
+    document.getElementById('simBtn').addEventListener('click', buildSimulation);
     document.getElementById('resetBtn').addEventListener('click', resetSim);
-    window.addEventListener('resize', resizeCanvas);
+    window.addEventListener('resize', resize);
 
-    resizeCanvas();
-    computeMetrics();
-    requestAnimationFrame(loop);
+    resize();
+    metrics();
+    requestAnimationFrame(frame);
   </script>
 </body>
 </html>
