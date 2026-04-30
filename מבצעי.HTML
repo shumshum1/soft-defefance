@@ -3,552 +3,362 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Operational Dispersion Comparison</title>
+  <title>Cluster Dispersion Scale Simulator</title>
   <style>
     :root {
       --bg: #0f1117;
       --panel: #181c26;
-      --panel-2: #1f2430;
+      --panel-2: #202636;
       --text: #e8eaf0;
-      --muted: #a4abbe;
-      --accent: #57a9ff;
-      --danger: #ff6b4a;
-      --ok: #71d7ff;
-      --border: rgba(255, 255, 255, 0.12);
+      --muted: #9ea8c2;
+      --accent: #78beff;
+      --border: rgba(255, 255, 255, 0.14);
+      --warn: #ffb467;
     }
-
     * { box-sizing: border-box; }
-
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      font-family: Inter, Segoe UI, Roboto, sans-serif;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-rows: auto 1fr;
     }
-
     header {
-      padding: 14px 20px;
+      padding: 14px 18px;
       border-bottom: 1px solid var(--border);
-      background: rgba(24, 28, 38, 0.85);
-      backdrop-filter: blur(10px);
+      background: rgba(24, 28, 38, 0.9);
     }
+    h1 { margin: 0; font-size: 1.05rem; }
+    .sub { margin-top: 5px; color: var(--muted); font-size: 0.88rem; }
 
-    h1 {
-      margin: 0;
-      font-size: 1.15rem;
-      font-weight: 600;
-      letter-spacing: 0.02em;
-    }
-
-    .subtitle {
-      margin-top: 4px;
-      color: var(--muted);
-      font-size: 0.9rem;
-    }
-
-    .app {
+    .layout {
       display: grid;
       grid-template-columns: 1fr 340px;
-      gap: 14px;
-      flex: 1;
-      padding: 14px;
+      gap: 12px;
+      padding: 12px;
       min-height: 0;
     }
-
-    .canvas-shell {
+    .canvas-panel, .control-panel {
       background: var(--panel);
       border: 1px solid var(--border);
       border-radius: 14px;
-      overflow: hidden;
-      position: relative;
-      min-height: 420px;
     }
-
+    .canvas-panel { position: relative; overflow: hidden; min-height: 460px; }
     canvas {
       width: 100%;
       height: 100%;
       display: block;
-      background: radial-gradient(circle at center, #11192a 0%, #0b0f17 56%, #06080d 100%);
+      background: radial-gradient(circle at center, #151b29 0%, #0b111a 55%, #070a11 100%);
     }
-
     .hud {
       position: absolute;
-      top: 12px;
-      left: 12px;
-      right: 12px;
+      top: 10px;
+      left: 10px;
+      right: 10px;
       display: flex;
       justify-content: space-between;
-      gap: 12px;
+      gap: 8px;
       pointer-events: none;
-      font-size: 0.85rem;
     }
-
-    .hud-chip {
-      background: rgba(8, 12, 20, 0.72);
-      border: 1px solid rgba(255, 255, 255, 0.16);
+    .chip {
+      background: rgba(7, 10, 16, 0.75);
+      border: 1px solid rgba(255,255,255,0.2);
       border-radius: 10px;
       padding: 8px 10px;
-      max-width: 55%;
+      font-size: 0.82rem;
       line-height: 1.35;
+      max-width: 55%;
     }
 
-    .panel {
-      background: var(--panel);
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
+    .control-panel {
+      padding: 14px;
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+    .row label {
       display: flex;
-      flex-direction: column;
-      gap: 14px;
-    }
-
-    .panel h2 {
-      margin: 0;
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .panel p {
-      margin: 0;
+      justify-content: space-between;
+      font-size: 0.86rem;
       color: var(--muted);
-      line-height: 1.45;
-      font-size: 0.9rem;
+      margin-bottom: 4px;
     }
-
+    input[type="range"] { width: 100%; }
     .btn {
-      width: 100%;
       border: 1px solid var(--border);
       border-radius: 12px;
-      padding: 15px 14px;
-      font-size: 0.98rem;
+      padding: 12px;
+      font-size: 0.96rem;
       font-weight: 600;
+      cursor: pointer;
       color: var(--text);
       background: var(--panel-2);
-      cursor: pointer;
-      transition: transform .14s ease, border-color .14s ease, box-shadow .14s ease;
     }
-
-    .btn:hover {
-      transform: translateY(-1px);
-      border-color: rgba(255,255,255,0.28);
-      box-shadow: 0 7px 18px rgba(0,0,0,0.25);
-    }
-
-    .btn.cluster { border-color: rgba(255, 107, 74, 0.45); }
-    .btn.cluster:hover { box-shadow: 0 0 0 1px rgba(255, 107, 74, 0.25), 0 7px 18px rgba(0,0,0,0.25); }
-
-    .btn.soft { border-color: rgba(113, 215, 255, 0.45); }
-    .btn.soft:hover { box-shadow: 0 0 0 1px rgba(113, 215, 255, 0.26), 0 7px 18px rgba(0,0,0,0.25); }
-
-    .btn.reset { border-color: rgba(255,255,255,0.2); }
-
-    .legend {
-      margin-top: 4px;
-      border-top: 1px dashed rgba(255,255,255,0.16);
-      padding-top: 12px;
+    .btn:hover { border-color: rgba(255,255,255,0.28); }
+    .metrics {
+      border-top: 1px dashed rgba(255,255,255,0.2);
+      padding-top: 10px;
       display: grid;
       gap: 8px;
-      font-size: 0.86rem;
     }
-
-    .dot {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      display: inline-block;
-      margin-right: 7px;
-      vertical-align: middle;
+    .metric {
+      background: #131825;
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 10px;
+      padding: 8px;
     }
+    .metric .k { font-size: 0.75rem; color: var(--muted); }
+    .metric .v { font-size: 1rem; font-weight: 600; margin-top: 3px; }
+    .note { color: var(--warn); font-size: 0.82rem; }
 
-    @media (max-width: 980px) {
-      .app {
-        grid-template-columns: 1fr;
-        grid-template-rows: minmax(420px, 1fr) auto;
-      }
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
+      .canvas-panel { min-height: 360px; }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>Space Warhead Dispersion Comparison</h1>
-    <div class="subtitle">Cluster Munition (Discrete) vs. Radial Aerosol Dispersion (Continuous Cloud)</div>
+    <h1>Cluster Munition Dispersion — Scale & Concentration</h1>
+    <div class="sub">Main target radius = 1,000m, each submunition cloud radius = 30m (3% of main radius).</div>
   </header>
 
-  <main class="app">
-    <section class="canvas-shell">
+  <main class="layout">
+    <section class="canvas-panel">
       <canvas id="simCanvas"></canvas>
       <div class="hud">
-        <div class="hud-chip" id="modeLabel">Mode: Idle</div>
-        <div class="hud-chip" id="overlayText">Select a simulation to start.</div>
+        <div class="chip" id="overlayA">Awaiting simulation input.</div>
+        <div class="chip" id="overlayB">Enemy missile path probe: active after simulation starts.</div>
       </div>
     </section>
 
-    <aside class="panel">
-      <h2>Controls</h2>
-      <p>Run either model and compare interception coverage quality in real-time.</p>
-
-      <button class="btn cluster" id="runCluster">Simulate Cluster Payload</button>
-      <button class="btn soft" id="runAerosol">Simulate Soft-Defense Aerosol</button>
-      <button class="btn reset" id="resetBtn">Reset</button>
-
-      <div class="legend">
-        <div><span class="dot" style="background:#ff7a5c"></span>Discrete explosive cells (with coverage gaps)</div>
-        <div><span class="dot" style="background:#9de7ff"></span>Continuous particle cloud (uniform coverage)</div>
-        <div><span class="dot" style="background:#ffe06a"></span>Enemy trajectory probe</div>
+    <aside class="control-panel">
+      <div class="row">
+        <label><span>Payload Volume</span><strong id="payloadVal">1000</strong></label>
+        <input id="payload" type="range" min="100" max="5000" value="1000" step="50" />
       </div>
+
+      <div class="row">
+        <label><span>Number of Submunitions</span><strong id="subVal">60</strong></label>
+        <input id="submunitions" type="range" min="10" max="300" value="60" step="1" />
+      </div>
+
+      <button class="btn" id="simulateBtn">Simulate</button>
+      <button class="btn" id="resetBtn">Reset</button>
+
+      <section class="metrics">
+        <div class="metric">
+          <div class="k">Total Particle Volume (70% of payload)</div>
+          <div class="v" id="totalParticles">700</div>
+        </div>
+        <div class="metric">
+          <div class="k">Particles per Submunition</div>
+          <div class="v" id="particlesPerSub">11.67</div>
+        </div>
+        <div class="metric">
+          <div class="k">Estimated Area Coverage (%)</div>
+          <div class="v" id="coveragePct">5.40%</div>
+        </div>
+        <div class="note">Even at high submunition counts, 30m local bursts over a 1km radius target leave substantial dark gaps.</div>
+      </section>
     </aside>
   </main>
 
   <script>
     const canvas = document.getElementById('simCanvas');
     const ctx = canvas.getContext('2d');
-    const modeLabel = document.getElementById('modeLabel');
-    const overlayText = document.getElementById('overlayText');
+    const payloadInput = document.getElementById('payload');
+    const subInput = document.getElementById('submunitions');
+    const payloadVal = document.getElementById('payloadVal');
+    const subVal = document.getElementById('subVal');
+    const totalParticlesEl = document.getElementById('totalParticles');
+    const particlesPerSubEl = document.getElementById('particlesPerSub');
+    const coveragePctEl = document.getElementById('coveragePct');
+    const overlayA = document.getElementById('overlayA');
 
-    const runClusterBtn = document.getElementById('runCluster');
-    const runAerosolBtn = document.getElementById('runAerosol');
-    const resetBtn = document.getElementById('resetBtn');
+    const MAIN_RADIUS_M = 1000;
+    const SUB_RADIUS_M = 30;
 
-    let mode = 'idle';
     let center = { x: 0, y: 0 };
-    let lastTime = performance.now();
-    let simClock = 0;
+    let pxPerMeter = 1;
+    let mainRadiusPx = 1;
+    let subRadiusPx = 1;
 
-    const cluster = {
-      bomblets: [],
-      explosionRings: [],
-      enemy: null
-    };
-
-    const aerosol = {
-      emitters: [],
-      particles: [],
-      enemy: null,
-      cloudRadius: 0
-    };
+    let submunitions = [];
+    let missile = null;
+    let simRunning = false;
 
     function resizeCanvas() {
       const rect = canvas.parentElement.getBoundingClientRect();
-      canvas.width = Math.floor(rect.width * devicePixelRatio);
-      canvas.height = Math.floor(rect.height * devicePixelRatio);
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
       canvas.style.width = rect.width + 'px';
       canvas.style.height = rect.height + 'px';
-      ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
       center.x = rect.width / 2;
       center.y = rect.height / 2;
+      mainRadiusPx = Math.min(rect.width, rect.height) * 0.43;
+      pxPerMeter = mainRadiusPx / MAIN_RADIUS_M;
+      subRadiusPx = SUB_RADIUS_M * pxPerMeter;
     }
 
-    function rand(min, max) {
-      return Math.random() * (max - min) + min;
+    function randomPointInCircle(radiusPx) {
+      const t = Math.random() * Math.PI * 2;
+      const u = Math.random() + Math.random();
+      const r = (u > 1 ? 2 - u : u) * radiusPx;
+      return { x: center.x + Math.cos(t) * r, y: center.y + Math.sin(t) * r };
     }
 
-    function resetAll() {
-      mode = 'idle';
-      simClock = 0;
-      cluster.bomblets = [];
-      cluster.explosionRings = [];
-      cluster.enemy = null;
-      aerosol.emitters = [];
-      aerosol.particles = [];
-      aerosol.enemy = null;
-      aerosol.cloudRadius = 0;
-      modeLabel.textContent = 'Mode: Idle';
-      overlayText.textContent = 'Select a simulation to start.';
+    function computeMetrics() {
+      const payload = Number(payloadInput.value);
+      const subCount = Number(subInput.value);
+      const totalParticles = payload * 0.7;
+      const particlesPerSub = totalParticles / subCount;
+
+      // Naive geometric upper-bound (no overlap), then capped.
+      const areaMain = Math.PI * MAIN_RADIUS_M * MAIN_RADIUS_M;
+      const areaSubs = subCount * Math.PI * SUB_RADIUS_M * SUB_RADIUS_M;
+      const coveragePct = Math.min(100, (areaSubs / areaMain) * 100);
+
+      payloadVal.textContent = payload.toLocaleString();
+      subVal.textContent = subCount.toLocaleString();
+      totalParticlesEl.textContent = totalParticles.toLocaleString(undefined, { maximumFractionDigits: 0 });
+      particlesPerSubEl.textContent = particlesPerSub.toFixed(2);
+      coveragePctEl.textContent = coveragePct.toFixed(2) + '%';
+
+      return { payload, subCount, totalParticles, particlesPerSub, coveragePct };
     }
 
-    function createClusterSimulation() {
-      resetAll();
-      mode = 'cluster';
-      modeLabel.textContent = 'Mode: Cluster Munition (Discrete)';
-      overlayText.textContent = 'Gaps forming in coverage... enemy trajectory finds open channel.';
+    function simulate() {
+      const { subCount, particlesPerSub, coveragePct } = computeMetrics();
+      submunitions = [];
 
-      const count = 50;
-      for (let i = 0; i < count; i++) {
-        const ang = rand(0, Math.PI * 2);
-        const speed = rand(92, 118);
-        cluster.bomblets.push({
-          x: center.x,
-          y: center.y,
-          vx: Math.cos(ang) * speed,
-          vy: Math.sin(ang) * speed,
-          life: 0,
-          exploded: false
-        });
+      const densityNorm = Math.min(1, particlesPerSub / 250);
+      const alpha = 0.06 + densityNorm * 0.28;
+
+      for (let i = 0; i < subCount; i++) {
+        const p = randomPointInCircle(mainRadiusPx);
+        submunitions.push({ x: p.x, y: p.y, alpha });
       }
 
-      const gapAngle = rand(-0.42, 0.42);
-      cluster.enemy = {
-        t: 0,
-        x: center.x + Math.cos(gapAngle) * -360,
-        y: center.y + Math.sin(gapAngle) * -170,
-        vx: 220,
-        vy: Math.tan(gapAngle) * 12,
-        hit: false
+      missile = {
+        x: center.x - mainRadiusPx - 50,
+        y: center.y + (Math.random() * 0.9 - 0.45) * mainRadiusPx,
+        vx: 140,
+        hit: false,
+        trail: []
       };
+
+      simRunning = true;
+      overlayA.textContent = `Coverage upper-bound: ${coveragePct.toFixed(2)}%. Large gaps remain across target volume.`;
     }
 
-    function createAerosolSimulation() {
-      resetAll();
-      mode = 'aerosol';
-      modeLabel.textContent = 'Mode: Radial Aerosol Dispersion (Continuous Cloud)';
-      overlayText.textContent = 'Forming uniform volumetric cloud... no trajectory can avoid contact.';
-
-      const radialSpeed = 92;
-      for (let i = 0; i < 6; i++) {
-        const ang = i * (Math.PI / 3);
-        aerosol.emitters.push({
-          x: center.x,
-          y: center.y,
-          vx: Math.cos(ang) * radialSpeed,
-          vy: Math.sin(ang) * radialSpeed,
-          angle: ang
-        });
-      }
-
-      aerosol.enemy = {
-        t: 0,
-        x: center.x - 360,
-        y: center.y - 20,
-        vx: 210,
-        vy: 0,
-        hit: false
-      };
+    function resetSim() {
+      submunitions = [];
+      missile = null;
+      simRunning = false;
+      overlayA.textContent = 'Awaiting simulation input.';
+      computeMetrics();
     }
 
-    function updateCluster(dt) {
-      simClock += dt;
-
-      for (const b of cluster.bomblets) {
-        if (!b.exploded) {
-          b.life += dt;
-          if (b.life < 2) {
-            b.x += b.vx * dt;
-            b.y += b.vy * dt;
-          } else {
-            b.exploded = true;
-            cluster.explosionRings.push({ x: b.x, y: b.y, r: 4, life: 0 });
-          }
-        }
-      }
-
-      for (const ring of cluster.explosionRings) {
-        ring.life += dt;
-        ring.r += 34 * dt;
-      }
-
-      cluster.explosionRings = cluster.explosionRings.filter(r => r.life < 1.2);
-
-      const e = cluster.enemy;
-      if (e) {
-        e.t += dt;
-        e.x += e.vx * dt;
-        e.y += e.vy * dt;
-
-        for (const ring of cluster.explosionRings) {
-          const dx = e.x - ring.x;
-          const dy = e.y - ring.y;
-          if ((dx * dx + dy * dy) < (ring.r * ring.r * 0.5)) {
-            e.hit = true;
-          }
-        }
-      }
-    }
-
-    function updateAerosol(dt) {
-      simClock += dt;
-      const spin = 10.8;
-
-      for (const em of aerosol.emitters) {
-        em.x += em.vx * dt;
-        em.y += em.vy * dt;
-
-        const tangentX = -Math.sin(em.angle) * spin;
-        const tangentY = Math.cos(em.angle) * spin;
-
-        aerosol.particles.push({
-          x: em.x,
-          y: em.y,
-          vx: em.vx * 0.22 + tangentX,
-          vy: em.vy * 0.22 + tangentY,
-          age: 0,
-          radius: rand(1.1, 2.3),
-          alpha: 0.3
-        });
-      }
-
-      for (const p of aerosol.particles) {
-        p.age += dt;
-        p.vx *= 0.988;
-        p.vy *= 0.988;
-        p.x += p.vx * dt;
-        p.y += p.vy * dt;
-        p.radius += dt * 5.2;
-        p.alpha = Math.max(0.08, 0.3 - p.age * 0.06);
-      }
-
-      aerosol.particles = aerosol.particles.filter(p => p.age < 9);
-
-      aerosol.cloudRadius = Math.min(260, aerosol.cloudRadius + dt * 35);
-
-      const e = aerosol.enemy;
-      if (e) {
-        e.t += dt;
-        e.x += e.vx * dt;
-        e.y += e.vy * dt;
-
-        const dx = e.x - center.x;
-        const dy = e.y - center.y;
-        const dist = Math.sqrt(dx * dx + dy * dy);
-        if (dist < aerosol.cloudRadius + 8) {
-          e.hit = true;
-        }
-      }
-    }
-
-    function drawCommonBackdrop() {
+    function drawBackdrop() {
       const w = canvas.clientWidth;
       const h = canvas.clientHeight;
-      ctx.save();
+      ctx.clearRect(0, 0, w, h);
+
       ctx.strokeStyle = 'rgba(255,255,255,0.06)';
-      ctx.lineWidth = 1;
-      for (let x = 0; x < w; x += 52) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, h);
-        ctx.stroke();
+      for (let x = 0; x < w; x += 50) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
       }
-      for (let y = 0; y < h; y += 52) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(w, y);
-        ctx.stroke();
+      for (let y = 0; y < h; y += 50) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
       }
-      ctx.restore();
 
       ctx.beginPath();
-      ctx.arc(center.x, center.y, 6, 0, Math.PI * 2);
-      ctx.fillStyle = '#ffffff';
-      ctx.fill();
+      ctx.arc(center.x, center.y, mainRadiusPx, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(120,190,255,0.45)';
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
     }
 
-    function drawCluster() {
-      for (const b of cluster.bomblets) {
-        if (!b.exploded) {
-          ctx.beginPath();
-          ctx.arc(b.x, b.y, 2.4, 0, Math.PI * 2);
-          ctx.fillStyle = '#ff9a7f';
-          ctx.fill();
+    function drawSubmunitionHeatmap() {
+      ctx.save();
+      ctx.globalCompositeOperation = 'lighter';
+      for (const s of submunitions) {
+        const g = ctx.createRadialGradient(s.x, s.y, 0, s.x, s.y, subRadiusPx);
+        g.addColorStop(0, `rgba(255,145,90,${s.alpha})`);
+        g.addColorStop(0.45, `rgba(255,120,70,${s.alpha * 0.7})`);
+        g.addColorStop(1, 'rgba(255,70,40,0)');
+        ctx.fillStyle = g;
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, subRadiusPx, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function updateAndDrawMissile(dt) {
+      if (!missile) return;
+      missile.x += missile.vx * dt;
+      missile.trail.push({ x: missile.x, y: missile.y });
+      if (missile.trail.length > 70) missile.trail.shift();
+
+      missile.hit = false;
+      for (const s of submunitions) {
+        const dx = missile.x - s.x;
+        const dy = missile.y - s.y;
+        if (dx * dx + dy * dy < subRadiusPx * subRadiusPx) {
+          missile.hit = true;
+          break;
         }
       }
 
-      for (const ring of cluster.explosionRings) {
-        const grad = ctx.createRadialGradient(ring.x, ring.y, 0, ring.x, ring.y, ring.r);
-        grad.addColorStop(0, 'rgba(255,220,100,0.45)');
-        grad.addColorStop(0.5, 'rgba(255,114,66,0.35)');
-        grad.addColorStop(1, 'rgba(255,40,20,0.08)');
-        ctx.beginPath();
-        ctx.arc(ring.x, ring.y, ring.r, 0, Math.PI * 2);
-        ctx.fillStyle = grad;
-        ctx.fill();
-      }
-
-      const e = cluster.enemy;
-      if (e) {
-        ctx.beginPath();
-        ctx.moveTo(e.x - 36, e.y);
-        ctx.lineTo(e.x, e.y);
-        ctx.strokeStyle = '#ffe06a';
-        ctx.lineWidth = 2.2;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, 5, 0, Math.PI * 2);
-        ctx.fillStyle = e.hit ? '#ff3f2f' : '#ffe06a';
-        ctx.fill();
-      }
-    }
-
-    function drawAerosol() {
-      ctx.save();
-      ctx.filter = 'blur(1.4px)';
-      for (const p of aerosol.particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(180,235,255,${p.alpha})`;
-        ctx.fill();
-      }
-      ctx.restore();
-
       ctx.beginPath();
-      ctx.arc(center.x, center.y, aerosol.cloudRadius, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(150,220,255,0.09)';
-      ctx.fill();
-      ctx.strokeStyle = 'rgba(150,220,255,0.28)';
-      ctx.lineWidth = 1.4;
+      for (let i = 0; i < missile.trail.length; i++) {
+        const p = missile.trail[i];
+        i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y);
+      }
+      ctx.strokeStyle = 'rgba(255,224,106,0.5)';
+      ctx.lineWidth = 1.8;
       ctx.stroke();
 
-      for (const em of aerosol.emitters) {
-        ctx.beginPath();
-        ctx.arc(em.x, em.y, 4, 0, Math.PI * 2);
-        ctx.fillStyle = '#b8ecff';
-        ctx.fill();
-      }
+      ctx.beginPath();
+      ctx.arc(missile.x, missile.y, 5, 0, Math.PI * 2);
+      ctx.fillStyle = missile.hit ? '#ff3f2a' : '#ffe06a';
+      ctx.fill();
 
-      const e = aerosol.enemy;
-      if (e) {
-        ctx.beginPath();
-        ctx.moveTo(e.x - 36, e.y);
-        ctx.lineTo(e.x, e.y);
-        ctx.strokeStyle = '#ffe06a';
-        ctx.lineWidth = 2.2;
-        ctx.stroke();
-
-        ctx.beginPath();
-        ctx.arc(e.x, e.y, 5.5, 0, Math.PI * 2);
-        ctx.fillStyle = e.hit ? '#ff4a31' : '#ffe06a';
-        ctx.fill();
-
-        if (e.hit) {
-          overlayText.textContent = 'Trajectory intersects continuous cloud: no gap path exists.';
-        }
+      if (!missile.hit && missile.x > center.x + mainRadiusPx + 20) {
+        overlayA.textContent = 'Missile traversed the target zone through dark gaps without intersecting a cloud.';
+        simRunning = false;
       }
     }
 
-    function animate(t) {
-      const dt = Math.min(0.033, (t - lastTime) / 1000);
-      lastTime = t;
+    let last = performance.now();
+    function loop(now) {
+      const dt = Math.min(0.033, (now - last) / 1000);
+      last = now;
 
-      ctx.clearRect(0, 0, canvas.clientWidth, canvas.clientHeight);
-      drawCommonBackdrop();
+      drawBackdrop();
+      drawSubmunitionHeatmap();
+      if (simRunning) updateAndDrawMissile(dt);
+      else if (missile) updateAndDrawMissile(0);
 
-      if (mode === 'cluster') {
-        updateCluster(dt);
-        drawCluster();
-        if (cluster.enemy && !cluster.enemy.hit && cluster.enemy.x > canvas.clientWidth + 20) {
-          overlayText.textContent = 'Enemy trajectory passed through a coverage gap.';
-        }
-      } else if (mode === 'aerosol') {
-        updateAerosol(dt);
-        drawAerosol();
-      }
-
-      requestAnimationFrame(animate);
+      requestAnimationFrame(loop);
     }
 
-    runClusterBtn.addEventListener('click', createClusterSimulation);
-    runAerosolBtn.addEventListener('click', createAerosolSimulation);
-    resetBtn.addEventListener('click', resetAll);
+    payloadInput.addEventListener('input', computeMetrics);
+    subInput.addEventListener('input', computeMetrics);
+    document.getElementById('simulateBtn').addEventListener('click', simulate);
+    document.getElementById('resetBtn').addEventListener('click', resetSim);
     window.addEventListener('resize', resizeCanvas);
 
     resizeCanvas();
-    resetAll();
-    requestAnimationFrame((t) => {
-      lastTime = t;
-      animate(t);
-    });
+    computeMetrics();
+    requestAnimationFrame(loop);
   </script>
 </body>
 </html>
